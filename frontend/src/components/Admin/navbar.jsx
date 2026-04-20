@@ -55,7 +55,13 @@ export const Sidebar = () => {
 };
 
 export const Topbar = () => {
-  const currentDate = "Monday, April 20, 2026";
+  const today = new Date();
+  const currentDate = today.toLocaleDateString('en-US', {
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
 
   return (
     <div className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-10">
