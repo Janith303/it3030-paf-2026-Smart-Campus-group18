@@ -100,7 +100,7 @@ export default function MyBookings() {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource ID</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Purpose</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
@@ -110,7 +110,7 @@ export default function MyBookings() {
                 <tbody className="divide-y divide-gray-50">
                   {bookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-gray-900">ID: #{booking.resourceId}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{booking.resourceId}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col text-sm">
                           <span className="flex items-center gap-1.5 text-gray-700">
