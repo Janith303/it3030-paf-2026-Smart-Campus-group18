@@ -28,4 +28,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startTime") LocalDateTime startTime, 
             @Param("endTime") LocalDateTime endTime
     );
+    @Query("SELECT b.status, COUNT(b) FROM Booking b WHERE b.userId = :userId GROUP BY b.status")
+        List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
 }
