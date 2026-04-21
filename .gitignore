@@ -27,3 +27,6 @@
 .idea/
 *.swp
 *.bak
+
+# Ignore local secret configurations
+application-local.properties

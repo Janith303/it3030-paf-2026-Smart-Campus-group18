@@ -4,6 +4,7 @@ import Incidents from "./components/Admin/incidents";
 // import CreateIncident from "./components/Admin/createIncident";
 // import TicketDetails from "./components/Admin/ticketDetails";
 import Resources from "./components/Admin/resouces";
+import BookResource from "./components/Lecture/booking";
 
 
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="incidents/create" element={<CreateIncident />} />
           <Route path="incidents/:id" element={<TicketDetails />} /> */}
           <Route path="/resources" element={<Resources />} />
+          <Route path="/user/book" element={<BookResource />} />
         </Route>
       </Routes>
     </BrowserRouter>
