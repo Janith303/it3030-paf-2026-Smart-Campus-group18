@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Dash from "./components/Admin/dash";
-import Incidents from "./components/Admin/incidents";
-// import CreateIncident from "./components/Admin/createIncident";
-// import TicketDetails from "./components/Admin/ticketDetails";
+import Incidents from "./components/Student/incidents";
+import CreateIncident from "./components/Student/createIncident";
+import TicketDetails from "./components/Student/ticketDetails";
 import Resources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
 
@@ -15,9 +15,8 @@ function App() {
         <Route>
           <Route path="/" element={<Dash />} />
           <Route path="/incidents" element={<Incidents />}/>
-          {/*  
-          <Route path="incidents/create" element={<CreateIncident />} />
-          <Route path="incidents/:id" element={<TicketDetails />} /> */}
+          <Route path="/incidents/create" element={<CreateIncident />} />
+          <Route path="/incidents/:id" element={<TicketDetails />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/user/book" element={<BookResource />} />
         </Route>

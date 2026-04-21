@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { AlertCircle, Clock, CheckCircle, Plus, Eye } from "lucide-react";
-import { Sidebar, Topbar } from "./navbar";
+import { Sidebar, Topbar } from "../Admin/navbar";
 
 const tickets = [
   {
