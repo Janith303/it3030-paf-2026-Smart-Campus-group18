@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.List;
+import java.util.Map;  
+import java.util.HashMap;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -81,5 +83,27 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Booking not found with id: " + id);
         }
         bookingRepository.deleteById(id);
+    }
+
+    @Override
+    public Map<String, Long> getUserStats(Long userId) {
+        List<Object[]> results = bookingRepository.getBookingStatsByUserId(userId);
+        Map<String, Long> stats = new HashMap<>();
+        
+        // Initialize with zeros so the frontend doesn't get 'null'
+        stats.put("TOTAL", 0L);
+        stats.put("PENDING", 0L);
+        stats.put("APPROVED", 0L);
+        stats.put("REJECTED", 0L);
+
+        long total = 0;
+        for (Object[] result : results) {
+            String status = result[0].toString();
+            Long count = (Long) result[1];
+            stats.put(status, count);
+            total += count;
+        }
+        stats.put("TOTAL", total);
+        return stats;
     }
 }
