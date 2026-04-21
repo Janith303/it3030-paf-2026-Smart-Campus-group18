@@ -30,7 +30,7 @@ export const Sidebar = () => {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 mt-2 space-y-1 overflow-y-auto pb-8">
+      <nav className="flex-1 px-4 mt-5 space-y-1 overflow-y-auto pb-8">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
 
