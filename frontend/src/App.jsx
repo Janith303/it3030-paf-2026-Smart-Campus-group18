@@ -5,6 +5,8 @@ import Incidents from "./components/Admin/incidents";
 // import TicketDetails from "./components/Admin/ticketDetails";
 import Resources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
+import MyBookings from "./components/Lecture/mybooking";
+import UserDashboard from "./components/Lecture/userdashboard";
 
 
 
@@ -20,6 +22,9 @@ function App() {
           <Route path="incidents/:id" element={<TicketDetails />} /> */}
           <Route path="/resources" element={<Resources />} />
           <Route path="/user/book" element={<BookResource />} />
+          <Route path="/user/bookings" element={<MyBookings />} />
+          <Route path="/user" element={<UserDashboard />} />
+
         </Route>
       </Routes>
     </BrowserRouter>
