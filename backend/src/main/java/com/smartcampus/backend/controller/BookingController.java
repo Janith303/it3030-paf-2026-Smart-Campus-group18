@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-@CrossOrigin(origins = "http://localhost:5173") // Crucial for connecting to React
+@CrossOrigin(origins = "http://localhost:5173", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.OPTIONS}) // Crucial for connecting to React
 public class BookingController {
 
     @Autowired
@@ -41,5 +41,26 @@ public class BookingController {
             @RequestParam String status,
             @RequestParam(required = false) String reason) {
         return ResponseEntity.ok(bookingService.updateStatus(id, status, reason));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Booking> cancelBooking(
+            @PathVariable Long id, 
+            @RequestParam String reason) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id, reason));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Booking> updateBookingStatus(
+            @PathVariable Long id, 
+            @RequestParam String status,
+            @RequestParam(required = false) String reason) {
+        return ResponseEntity.ok(bookingService.updateStatus(id, status, reason));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
+        return ResponseEntity.noContent().build(); // 204 No Content is the standard for successful deletes
     }
 }

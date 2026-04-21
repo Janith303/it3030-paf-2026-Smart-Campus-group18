@@ -9,4 +9,7 @@ public interface BookingService {
     Booking updateStatus(Long bookingId, String status, String reason);
     List<Booking> getAllBookings();
     List<Booking> getBookingsByUserId(Long userId);
+
+    Booking cancelBooking(Long bookingId, String reason);
+    void deleteBooking(Long id);
 }
