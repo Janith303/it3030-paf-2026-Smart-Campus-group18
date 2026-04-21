@@ -41,6 +41,9 @@ public class Booking {
     @Column(nullable = false)
     private Boolean isCheckedIn = false;
 
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
+    private String cancellationReason;
+
     // --- Standard Getters and Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -74,4 +77,8 @@ public class Booking {
 
     public Boolean getIsCheckedIn() { return isCheckedIn; }
     public void setIsCheckedIn(Boolean checkedIn) { isCheckedIn = checkedIn; }
+    
+    // Fixed: Added Getter and kept the Setter
+    public String getCancellationReason() { return cancellationReason; }
+    public void setCancellationReason(String cancellationReason) { this.cancellationReason = cancellationReason; }
 }

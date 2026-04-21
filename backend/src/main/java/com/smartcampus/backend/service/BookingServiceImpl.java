@@ -18,7 +18,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking createBooking(BookingRequestDTO request) {
         boolean hasConflict = bookingRepository.existsOverlappingBooking(
-            request.getResourceId(), request.getStartTime(), request.getEndTime());
+                request.getResourceId(), request.getStartTime(), request.getEndTime());
 
         if (hasConflict) {
             throw new RuntimeException("Conflict: Resource is already booked for this time range.");
@@ -31,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setEndTime(request.getEndTime());
         booking.setPurpose(request.getPurpose());
         booking.setExpectedAttendees(request.getExpectedAttendees());
-        booking.setStatus(BookingStatus.PENDING); 
+        booking.setStatus(BookingStatus.PENDING);
 
         return bookingRepository.save(booking);
     }
@@ -39,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking updateStatus(Long bookingId, String status, String reason) {
         Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         BookingStatus newStatus = BookingStatus.valueOf(status.toUpperCase());
         booking.setStatus(newStatus);
@@ -53,13 +53,33 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.save(booking);
     }
 
-    @Override 
-    public List<Booking> getAllBookings() { 
-        return bookingRepository.findAll(); 
+    @Override
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
     }
-    
-    @Override 
-    public List<Booking> getBookingsByUserId(Long userId) { 
-        return bookingRepository.findByUserId(userId); 
+
+    @Override
+    public List<Booking> getBookingsByUserId(Long userId) {
+        return bookingRepository.findByUserId(userId);
+    }
+
+    @Override
+    public Booking cancelBooking(Long bookingId, String reason) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancellationReason(reason);
+
+        return bookingRepository.save(booking);
+    }
+
+    @Override
+    public void deleteBooking(Long id) {
+        // Check if it exists before deleting to avoid errors
+        if (!bookingRepository.existsById(id)) {
+            throw new RuntimeException("Booking not found with id: " + id);
+        }
+        bookingRepository.deleteById(id);
     }
 }
