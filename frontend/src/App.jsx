@@ -9,6 +9,7 @@ import MyBookings from "./components/Lecture/mybooking";
 import UserDashboard from "./components/Lecture/userdashboard";
 import AdminBookings from "./components/Admin/AdminBookings";
 import CheckInScreen from "./components/Admin/CheckInScreen";
+import Home from "./components/Home/home";
 
 
 
@@ -17,7 +18,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route>
-          <Route path="/" element={<Dash />} />
+          <Route path="/" element={<Home />} />
           <Route path="/incidents" element={<Incidents />}/>
           {/*  
           <Route path="incidents/create" element={<CreateIncident />} />
