@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Ticket,
-  Building2, LayoutDashboard, Layers, 
+ Building2, LayoutDashboard, Layers, 
   AlertCircle, Search, Bell, User, Calendar, ScanLine
 } from 'lucide-react';
 

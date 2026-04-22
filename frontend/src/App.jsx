@@ -23,7 +23,6 @@ function App() {
           <Route path="/admin/tickets" element={<AdminTickets />} />
           <Route path="/technician/tickets" element={<AssignedTickets />} />
           <Route path="/" element={<Home />} />
-          <Route path="/incidents" element={<Incidents />}/>
           {/*  
           <Route path="incidents/create" element={<CreateIncident />} />
           <Route path="incidents/:id" element={<TicketDetails />} /> */}
