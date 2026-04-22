@@ -30,7 +30,7 @@ export default function UserCreateIncident() {
     category: "",
     description: "",
     priority: "",
-    contact: ""
+    preferredContact: ""
   });
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
@@ -73,11 +73,35 @@ export default function UserCreateIncident() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    console.log("Form submitted:", { ...formData, files });
-    alert("Ticket submitted successfully!");
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("category", formData.category);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("priority", formData.priority);
+    formDataToSend.append("preferredContact", formData.preferredContact);
+
+    files.forEach(file => {
+      formDataToSend.append("files", file);
+    });
+
+    console.log("Sending with files:", files.length);
+
+    try {
+      const res = await fetch("http://localhost:8080/api/tickets", {
+        method: "POST",
+        body: formDataToSend
+      });
+
+      const data = await res.json();
+      console.log("Created:", data);
+      alert("Ticket Created!");
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
 
   return (
@@ -194,8 +218,8 @@ export default function UserCreateIncident() {
                   </label>
                   <input
                     type="text"
-                    name="contact"
-                    value={formData.contact}
+                    name="preferredContact"
+                    value={formData.preferredContact}
                     onChange={handleChange}
                     placeholder="Email or phone number"
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all"

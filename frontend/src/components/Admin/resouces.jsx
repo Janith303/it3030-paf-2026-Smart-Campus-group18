@@ -7,7 +7,7 @@ import { Sidebar, Topbar } from './navbar';
 
 export default function Home() {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       
       {/* 1. Sidebar on the left */}
       <Sidebar />
