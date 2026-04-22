@@ -9,7 +9,9 @@ import {
   Info, 
   Trash2,
   MessageSquare,
-  QrCode // <-- Added QR Code icon
+  QrCode,
+  Filter,          
+  ArrowUpDown      
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -17,9 +19,11 @@ export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // --- MODAL STATES ---
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [sortOrder, setSortOrder] = useState('NEWEST'); 
+  
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
-  const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '' }); // <-- New QR Modal State
+  const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
 
   const fetchBookings = () => {
     setLoading(true);
@@ -78,110 +82,189 @@ export default function MyBookings() {
     }
   };
 
+  // UPGRADED: Bulletproof Date Sorting Logic
+  const processedBookings = bookings
+    .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
+    .sort((a, b) => {
+      // Safety check: If a date is missing entirely, push it to the bottom
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+
+      // Convert to reliable JavaScript timestamps
+      const dateA = new Date(a.startTime).getTime();
+      const dateB = new Date(b.startTime).getTime();
+
+      // Safety check: If a date is "Invalid Date", ignore the sort for that row
+      if (isNaN(dateA) || isNaN(dateB)) return 0;
+
+      // Do the math based on selection
+      return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
+    });
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    // FIXED: min-h-screen and overflow-x-hidden for layout stability
+    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <UserSidebar />
-      <div className="flex-1 flex flex-col ml-64">
+      
+      {/* FIXED: min-w-0 to prevent flexbox blowout */}
+      <div className="flex-1 flex flex-col ml-64 min-w-0">
         <UserTopbar />
         
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
-              <p className="text-gray-500">Track and manage your resource reservations.</p>
+            
+            {/* Header Area with Filter and Sort Controls */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
+                <p className="text-gray-500">Track and manage your resource reservations.</p>
+              </div>
+
+              {/* Controls */}
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                
+                {/* Filter Dropdown */}
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
+                  <Filter size={16} className="text-gray-400" />
+                  <select 
+                    className="text-sm font-medium focus:outline-none bg-transparent w-full cursor-pointer text-gray-700"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="ALL">All Statuses</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
+                  <ArrowUpDown size={16} className="text-gray-400" />
+                  <select 
+                    className="text-sm font-medium focus:outline-none bg-transparent w-full cursor-pointer text-gray-700"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                  >
+                    <option value="OLDEST">Earliest First (Upcoming)</option>
+                    <option value="NEWEST">Latest First (Furthest Away)</option>
+                  </select>
+                </div>
+
+              </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource ID</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Purpose</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {bookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-gray-900">{booking.resourceId}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col text-sm">
-                          <span className="flex items-center gap-1.5 text-gray-700">
-                            <Calendar size={14} className="text-gray-400" /> 
-                            {new Date(booking.startTime).toLocaleDateString()}
-                          </span>
-                          <span className="flex items-center gap-1.5 text-gray-500 mt-0.5">
-                            <Clock size={14} className="text-gray-400" /> 
-                            {new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(booking.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{booking.purpose}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(booking.status)}`}>
-                          {booking.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2">
-                          
-                          {/* --- NEW: View Entry Pass (QR Token) Button --- */}
-                          {booking.status === 'APPROVED' && booking.qrToken && (
-                            <button 
-                              onClick={() => setQrModal({ isOpen: true, token: booking.qrToken, resourceId: booking.resourceId })}
-                              className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                              title="View Entry Pass"
-                            >
-                              <QrCode size={20} />
-                            </button>
-                          )}
-
-                          {/* View Admin Message Button */}
-                          {booking.adminReason && (
-                            <button 
-                              onClick={() => setMessageModal({ isOpen: true, text: booking.adminReason, status: booking.status })}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="View Admin Message"
-                            >
-                              <MessageSquare size={20} />
-                            </button>
-                          )}
-
-                          {/* Cancel Button */}
-                          {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
-                            <button 
-                              onClick={() => handleCancel(booking.id)}
-                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                              title="Cancel Booking"
-                            >
-                              <XCircle size={20} />
-                            </button>
-                          )}
-
-                          {/* Delete Button */}
-                          <button 
-                            onClick={() => handleDelete(booking.id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete Permanently"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        </div>
-                      </td>
+            {/* --- UPGRADED UX SECTION --- */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full">
+              {/* Added Ghost Scroll styling and whitespace-nowrap */}
+              <div className="overflow-x-auto w-full pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource Details</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Purpose</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {processedBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
+                        
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-gray-900">
+                            {booking.resourceName || "Resource Name Pending"}
+                          </div>
+                          <div className="text-xs text-gray-500 font-mono mt-0.5">
+                            ID: #{booking.resourceId}
+                          </div>
+                        </td>
 
-              {bookings.length === 0 && !loading && (
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col text-sm">
+                            <span className="flex items-center gap-1.5 text-gray-700">
+                              <Calendar size={14} className="text-gray-400" /> 
+                              {new Date(booking.startTime).toLocaleDateString()}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-gray-500 mt-0.5">
+                              <Clock size={14} className="text-gray-400" /> 
+                              {new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(booking.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[200px]">{booking.purpose}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(booking.status)}`}>
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-end gap-2">
+                            
+                            {booking.status === 'APPROVED' && booking.qrToken && (
+                              <button 
+                                onClick={() => setQrModal({ 
+                                  isOpen: true, 
+                                  token: booking.qrToken, 
+                                  resourceId: booking.resourceId,
+                                  resourceName: booking.resourceName 
+                                })}
+                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                title="View Entry Pass"
+                              >
+                                <QrCode size={20} />
+                              </button>
+                            )}
+
+                            {booking.adminReason && (
+                              <button 
+                                onClick={() => setMessageModal({ isOpen: true, text: booking.adminReason, status: booking.status })}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="View Admin Message"
+                              >
+                                <MessageSquare size={20} />
+                              </button>
+                            )}
+
+                            {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
+                              <button 
+                                onClick={() => handleCancel(booking.id)}
+                                className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                title="Cancel Booking"
+                              >
+                                <XCircle size={20} />
+                              </button>
+                            )}
+
+                            <button 
+                              onClick={() => handleDelete(booking.id)}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Permanently"
+                            >
+                              <Trash2 size={20} />
+                          </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Handled empty state */}
+              {processedBookings.length === 0 && !loading && (
                 <div className="p-12 text-center">
                   <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Info className="text-gray-400" size={30} />
                   </div>
                   <h3 className="text-gray-900 font-medium">No bookings found</h3>
-                  <p className="text-gray-500 text-sm mt-1">You haven't made any resource requests yet.</p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {bookings.length === 0 
+                      ? "You haven't made any resource requests yet." 
+                      : "No requests match your current filters."}
+                  </p>
                 </div>
               )}
             </div>
@@ -212,16 +295,16 @@ export default function MyBookings() {
         </div>
       )}
 
-   {/* --- UPGRADED: Real QR Code Entry Pass Modal --- */}
+      {/* --- Entry Pass Modal --- */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
             <div className="flex flex-col items-center text-center">
               
               <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
-              <p className="text-sm text-gray-500 mb-6">Resource #{qrModal.resourceId}</p>
+              <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
+              <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
               
-              {/* --- FIXED: Using QRCodeSVG instead --- */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 inline-block">
                 <QRCodeSVG 
                   value={qrModal.token || "ERROR-NO-TOKEN"} 
@@ -231,7 +314,7 @@ export default function MyBookings() {
               </div>
               
               <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
-                ID: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
+                Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
               </p>
 
               <p className="text-sm font-medium text-gray-600 mb-6 px-4">
@@ -239,7 +322,7 @@ export default function MyBookings() {
               </p>
 
               <button 
-                onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '' })}
+                onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '', resourceName: '' })}
                 className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
               >
                 Close Pass
