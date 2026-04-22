@@ -13,4 +13,5 @@ public interface BookingService {
     Booking cancelBooking(Long bookingId, String reason);
     void deleteBooking(Long id);
     Map<String, Long> getUserStats(Long userId);
+    Booking verifyCheckIn(String token);
 }
