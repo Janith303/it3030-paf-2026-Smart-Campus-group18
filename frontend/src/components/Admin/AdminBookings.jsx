@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar, Topbar } from './navbar'; // Adjust import based on your file name
-import { CheckCircle, XCircle, Filter, Info, MessageSquare } from 'lucide-react';
+import { Sidebar, Topbar } from './navbar'; 
+import { CheckCircle, XCircle, Filter, Info, MessageSquare, UserCheck } from 'lucide-react';
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState('ALL');
-  const [selectedBooking, setSelectedBooking] = useState(null); // For the Action Modal
+  const [selectedBooking, setSelectedBooking] = useState(null); 
   const [adminReason, setAdminReason] = useState('');
-  const [actionType, setActionType] = useState(''); // 'APPROVED' or 'REJECTED'
+  const [actionType, setActionType] = useState(''); 
 
   useEffect(() => {
     fetchBookings();
@@ -35,7 +35,7 @@ export default function AdminBookings() {
       if (response.ok) {
         setSelectedBooking(null);
         setAdminReason('');
-        fetchBookings(); // Refresh list
+        fetchBookings(); 
       }
     } catch (error) {
       alert("Failed to update status.");
@@ -79,12 +79,14 @@ export default function AdminBookings() {
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <table className="w-full text-left">
+                {/* FIXED: Exactly 6 Headers in the correct order */}
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">User ID</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Resource ID</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Purpose</th>
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Entry Status</th> 
                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Actions</th>
                   </tr>
                 </thead>
@@ -94,6 +96,8 @@ export default function AdminBookings() {
                       <td className="px-6 py-4 font-medium text-gray-900">User {booking.userId}</td>
                       <td className="px-6 py-4 text-gray-600">{booking.resourceId}</td>
                       <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[200px]">{booking.purpose}</td>
+                      
+                      {/* FIXED: Status Column */}
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border 
                           ${booking.status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-100' : 
@@ -102,6 +106,30 @@ export default function AdminBookings() {
                           {booking.status}
                         </span>
                       </td>
+
+                      {/* FIXED: Entry Status Column (No nested <td> tags) */}
+                      <td className="px-6 py-4">
+                        {booking.status === 'APPROVED' ? (
+                          booking.isCheckedIn ? (
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                <UserCheck size={14}/> Checked In
+                              </span>
+                              <span className="text-xs text-gray-500 mt-0.5">
+                                {booking.checkInTime ? new Date(booking.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time unknown'}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-medium text-amber-600 border border-amber-200 bg-amber-50 px-2 py-1 rounded-md">
+                              Awaiting Arrival
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )}
+                      </td>
+                      
+                      {/* FIXED: Actions Column */}
                       <td className="px-6 py-4 text-right">
                         {booking.status === 'PENDING' ? (
                           <div className="flex justify-end gap-2">

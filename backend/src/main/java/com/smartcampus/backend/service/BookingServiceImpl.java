@@ -142,6 +142,7 @@ public class BookingServiceImpl implements BookingService {
 
         // 3. Mark as checked in
         booking.setIsCheckedIn(true);
+        booking.setCheckInTime(java.time.LocalDateTime.now());
         return bookingRepository.save(booking);
     }
 }
