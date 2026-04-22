@@ -44,6 +44,8 @@ public class Booking {
     @Column(name = "cancellation_reason", columnDefinition = "TEXT")
     private String cancellationReason;
 
+    private String resourceName;
+
     // --- Standard Getters and Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -92,5 +94,13 @@ public class Booking {
 
     public void setCheckInTime(java.time.LocalDateTime checkInTime) {
         this.checkInTime = checkInTime;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 }
