@@ -12,6 +12,7 @@ import UserTicketDetails from "./components/User/ticketDetails";
 import AdminBookings from "./components/Admin/AdminBookings";
 import CheckInScreen from "./components/Admin/CheckInScreen";
 import Home from "./components/Home/home";
+import Admindashboard from "./components/Admin/dash";
 
 
 
@@ -23,9 +24,7 @@ function App() {
           <Route path="/admin/tickets" element={<AdminTickets />} />
           <Route path="/technician/tickets" element={<AssignedTickets />} />
           <Route path="/" element={<Home />} />
-          {/*  
-          <Route path="incidents/create" element={<CreateIncident />} />
-          <Route path="incidents/:id" element={<TicketDetails />} /> */}
+          <Route path="/admin/dashboard" element={<Admindashboard />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/user/book" element={<BookResource />} />
           <Route path="/user/bookings" element={<MyBookings />} />
