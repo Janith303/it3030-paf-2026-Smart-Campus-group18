@@ -11,6 +11,7 @@ import {
   MessageSquare,
   QrCode // <-- Added QR Code icon
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -211,33 +212,37 @@ export default function MyBookings() {
         </div>
       )}
 
-      {/* --- NEW: QR Token/Entry Pass Modal --- */}
+   {/* --- UPGRADED: Real QR Code Entry Pass Modal --- */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
             <div className="flex flex-col items-center text-center">
-              <div className="bg-indigo-50 p-4 rounded-full mb-4 text-indigo-600">
-                <QrCode size={40} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-1">Access Token</h3>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
               <p className="text-sm text-gray-500 mb-6">Resource #{qrModal.resourceId}</p>
               
-              {/* Displaying the UUID Token clearly */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 w-full mb-6 break-all">
-                <code className="text-sm font-mono text-indigo-700 font-bold select-all">
-                  {qrModal.token}
-                </code>
+              {/* --- FIXED: Using QRCodeSVG instead --- */}
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 inline-block">
+                <QRCodeSVG 
+                  value={qrModal.token || "ERROR-NO-TOKEN"} 
+                  size={180}
+                  level="H"
+                />
               </div>
               
-              <p className="text-xs text-gray-400 mb-6 px-4">
-                Present this token code to the security personnel at the resource location for check-in.
+              <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
+                ID: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
+              </p>
+
+              <p className="text-sm font-medium text-gray-600 mb-6 px-4">
+                Present this QR code to the security personnel for scanning.
               </p>
 
               <button 
                 onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '' })}
-                className="w-full bg-indigo-600 text-white font-medium py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+                className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
               >
-                Done
+                Close Pass
               </button>
             </div>
           </div>
