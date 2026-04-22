@@ -7,17 +7,20 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Info, 
-  Trash2 
+  Trash2,
+  MessageSquare // <-- Added this icon
 } from 'lucide-react';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // --- NEW STATE FOR THE MESSAGE MODAL ---
+  const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
 
-  // 1. Fetch user's bookings on load
   const fetchBookings = () => {
     setLoading(true);
-    fetch('http://localhost:8080/api/bookings/user/1') // Using placeholder ID 1
+    fetch('http://localhost:8080/api/bookings/user/1') 
       .then(res => res.json())
       .then(data => {
         setBookings(data);
@@ -33,36 +36,26 @@ export default function MyBookings() {
     fetchBookings();
   }, []);
 
-  // 2. Handle Cancellation (PATCH)
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
-
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, {
-        method: 'PATCH'
-      });
-
+      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, { method: 'PATCH' });
       if (response.ok) {
         alert("Booking cancelled successfully.");
-        fetchBookings(); // Refresh list
+        fetchBookings(); 
       }
     } catch (error) {
       alert("Failed to cancel booking.");
     }
   };
 
-  // 3. Handle Permanent Deletion (DELETE)
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this record? This cannot be undone.")) return;
-
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, {
-        method: 'DELETE'
-      });
-
+      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, { method: 'DELETE' });
       if (response.ok) {
         alert("Record deleted from history.");
-        fetchBookings(); // Refresh list
+        fetchBookings(); 
       } else {
         alert("Failed to delete the record.");
       }
@@ -72,7 +65,6 @@ export default function MyBookings() {
     }
   };
 
-  // Helper for status badges
   const getStatusStyle = (status) => {
     switch (status) {
       case 'APPROVED': return 'bg-green-100 text-green-700 border-green-200';
@@ -131,7 +123,19 @@ export default function MyBookings() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
-                          {/* Cancel Button (Only if Pending or Approved) */}
+                          
+                          {/* --- NEW: View Message Button (Only shows if adminReason exists) --- */}
+                          {booking.adminReason && (
+                            <button 
+                              onClick={() => setMessageModal({ isOpen: true, text: booking.adminReason, status: booking.status })}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="View Admin Message"
+                            >
+                              <MessageSquare size={20} />
+                            </button>
+                          )}
+
+                          {/* Cancel Button */}
                           {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
                             <button 
                               onClick={() => handleCancel(booking.id)}
@@ -142,7 +146,7 @@ export default function MyBookings() {
                             </button>
                           )}
 
-                          {/* Delete Button (Always Available) */}
+                          {/* Delete Button */}
                           <button 
                             onClick={() => handleDelete(booking.id)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -170,6 +174,34 @@ export default function MyBookings() {
           </div>
         </main>
       </div>
+
+      {/* --- NEW: Admin Message Modal --- */}
+      {messageModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center">
+              
+              <div className={`p-4 rounded-full mb-4 ${messageModal.status === 'APPROVED' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                <MessageSquare size={32} />
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Message from Admin</h3>
+              
+              {/* The actual message from the database */}
+              <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 w-full mb-6">
+                <p className="text-gray-700 italic">"{messageModal.text}"</p>
+              </div>
+              
+              <button 
+                onClick={() => setMessageModal({ isOpen: false, text: '', status: '' })}
+                className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
