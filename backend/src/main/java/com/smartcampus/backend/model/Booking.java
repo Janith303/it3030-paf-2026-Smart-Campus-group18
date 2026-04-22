@@ -81,4 +81,16 @@ public class Booking {
     // Fixed: Added Getter and kept the Setter
     public String getCancellationReason() { return cancellationReason; }
     public void setCancellationReason(String cancellationReason) { this.cancellationReason = cancellationReason; }
+
+    // ADD THIS NEW VARIABLE:
+    private java.time.LocalDateTime checkInTime; 
+
+    // Don't forget to add the Getter and Setter at the bottom of the file!
+    public java.time.LocalDateTime getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(java.time.LocalDateTime checkInTime) {
+        this.checkInTime = checkInTime;
+    }
 }
