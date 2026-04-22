@@ -23,4 +23,16 @@ public class BookingRequestDTO {
     public void setPurpose(String purpose) { this.purpose = purpose; }
     public Integer getExpectedAttendees() { return expectedAttendees; }
     public void setExpectedAttendees(Integer expectedAttendees) { this.expectedAttendees = expectedAttendees; }
+
+    // Underneath private Long resourceId; add this:
+    private String resourceName;
+
+    // ... scroll to the bottom and add the Getter and Setter:
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
 }
