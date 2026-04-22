@@ -33,4 +33,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
 
     Optional<Booking> findByQrToken(String qrToken);
+    List<Booking> findByQrTokenStartingWith(String prefix);
 }

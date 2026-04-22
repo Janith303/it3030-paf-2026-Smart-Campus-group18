@@ -109,17 +109,38 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking verifyCheckIn(String token) {
-        Booking booking = bookingRepository.findByQrToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid QR Token. No booking found."));
+        Booking booking;
 
-        if (booking.getIsCheckedIn()) {
-            throw new RuntimeException("Warning: This QR code has already been used for check-in!");
+        // 1. SMART ROUTING: Check if it's a Short ID or a Full QR Scan
+        if (token.length() < 36) {
+            // It's a manual entry! Search for tokens starting with these characters
+            List<Booking> matches = bookingRepository.findByQrTokenStartingWith(token);
+            
+            if (matches.isEmpty()) {
+                throw new RuntimeException("Invalid Pass ID. No booking found.");
+            }
+            if (matches.size() > 1) {
+                throw new RuntimeException("Multiple matches found. Please scan the full QR code.");
+            }
+            booking = matches.get(0); // Grab the exact match
+            
+        } else {
+            // It's a full camera scan! Search for the exact UUID
+            booking = bookingRepository.findByQrToken(token)
+                    .orElseThrow(() -> new RuntimeException("Invalid QR Token. No booking found."));
         }
 
-        if (booking.getStatus() != BookingStatus.APPROVED) {
+        // 2. Security Validation
+        if (booking.getIsCheckedIn()) {
+            throw new RuntimeException("Warning: This pass has already been used for check-in!");
+        }
+
+        // (Ensure this matches however you defined your status, either Enum or String)
+        if (!"APPROVED".equals(booking.getStatus().toString())) { 
             throw new RuntimeException("Error: This booking is not approved.");
         }
 
+        // 3. Mark as checked in
         booking.setIsCheckedIn(true);
         return bookingRepository.save(booking);
     }
