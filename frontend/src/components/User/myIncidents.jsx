@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { AlertCircle, Clock, CheckCircle, Plus, Eye } from "lucide-react";
-import { Sidebar, Topbar } from "../Admin/navbar";
+import { UserSidebar, UserTopbar } from "../Lecture/navbar";
 
 const tickets = [
   {
@@ -66,24 +66,21 @@ const getPriorityBadge = (priority) => {
   );
 };
 
-export default function Incidents() {
+export default function MyIncidents() {
   return (
     <div className="flex main-h-screen bg-gray-50">
-      {/* 1. Fixed Sidebar */}
-      <Sidebar />
-      {/* 2. Main Content Wrapper (Pushed right by ml-64) */}
+      <UserSidebar />
       <div className="flex-1 flex flex-col ml-64">
-        {/* Topbar stays at the top of this section */}
-        <Topbar />
+        <UserTopbar />
         <main className="p-8">
           <div className="mb-8 flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-500 mb-1">Welcome back!</p>
-              <h2 className="text-2xl font-bold text-gray-900">Incidents</h2>
+              <h2 className="text-2xl font-bold text-gray-900">My Incidents</h2>
               <p className="text-gray-500">Maintenance & Incident Ticketing</p>
             </div>
             <Link
-              to="/incidents/create"
+              to="/user/incidents/create"
               className="bg-indigo-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-sm"
             >
               <Plus size={18} />
@@ -176,7 +173,7 @@ export default function Incidents() {
                     </p>
                   </div>
                   <Link
-                    to={`/incidents/${ticket.id}`}
+                    to={`/user/incidents/${ticket.id}`}
                     className="mt-4 md:mt-0 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
                   >
                     <Eye size={16} />

@@ -1,14 +1,13 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dash from "./components/Admin/dash";
-import Incidents from "./components/Student/incidents";
-import CreateIncident from "./components/Student/createIncident";
-import TicketDetails from "./components/Student/ticketDetails";
+import AdminTickets from "./components/Admin/tickets";
 import Resources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
 import MyBookings from "./components/Lecture/mybooking";
 import UserDashboard from "./components/Lecture/userdashboard";
-
-
+import MyIncidents from "./components/User/myIncidents";
+import UserCreateIncident from "./components/User/createIncident";
+import UserTicketDetails from "./components/User/ticketDetails";
 
 function App() {
   return (
@@ -16,14 +15,14 @@ function App() {
       <Routes>
         <Route>
           <Route path="/" element={<Dash />} />
-          <Route path="/incidents" element={<Incidents />}/>
-          <Route path="/incidents/create" element={<CreateIncident />} />
-          <Route path="/incidents/:id" element={<TicketDetails />} />
+          <Route path="/admin/tickets" element={<AdminTickets />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/user/book" element={<BookResource />} />
           <Route path="/user/bookings" element={<MyBookings />} />
           <Route path="/user" element={<UserDashboard />} />
-
+          <Route path="/user/incidents" element={<MyIncidents />} />
+          <Route path="/user/incidents/create" element={<UserCreateIncident />} />
+          <Route path="/user/incidents/:id" element={<UserTicketDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>
