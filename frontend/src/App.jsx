@@ -9,15 +9,24 @@ import UserDashboard from "./components/Lecture/userdashboard";
 import MyIncidents from "./components/User/myIncidents";
 import UserCreateIncident from "./components/User/createIncident";
 import UserTicketDetails from "./components/User/ticketDetails";
+import AdminBookings from "./components/Admin/AdminBookings";
+import CheckInScreen from "./components/Admin/CheckInScreen";
+import Home from "./components/Home/home";
+
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route>
-          <Route path="/" element={<Dash />} />
           <Route path="/admin/tickets" element={<AdminTickets />} />
           <Route path="/technician/tickets" element={<AssignedTickets />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/incidents" element={<Incidents />}/>
+          {/*  
+          <Route path="incidents/create" element={<CreateIncident />} />
+          <Route path="incidents/:id" element={<TicketDetails />} /> */}
           <Route path="/resources" element={<Resources />} />
           <Route path="/user/book" element={<BookResource />} />
           <Route path="/user/bookings" element={<MyBookings />} />
@@ -25,6 +34,8 @@ function App() {
           <Route path="/user/incidents" element={<MyIncidents />} />
           <Route path="/user/incidents/create" element={<UserCreateIncident />} />
           <Route path="/user/incidents/:id" element={<UserTicketDetails />} />
+          <Route path="/admin/bookings" element={<AdminBookings />} />
+          <Route path="/admin/check-in" element={<CheckInScreen />} />
         </Route>
       </Routes>
     </BrowserRouter>

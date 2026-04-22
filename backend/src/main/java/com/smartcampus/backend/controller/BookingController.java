@@ -68,4 +68,14 @@ public class BookingController {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
+
+    // 8. Verify QR Token and Check-in
+    @PatchMapping("/verify")
+    public ResponseEntity<?> verifyCheckIn(@RequestParam String token) {
+        try {
+            return ResponseEntity.ok(bookingService.verifyCheckIn(token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
 }

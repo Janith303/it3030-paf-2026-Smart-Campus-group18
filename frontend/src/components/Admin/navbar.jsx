@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Building2, LayoutDashboard, Layers, Ticket,
-  Search, Bell, User
+  Ticket,
+  Building2, LayoutDashboard, Layers, 
+  AlertCircle, Search, Bell, User, Calendar, ScanLine
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -12,6 +13,9 @@ export const Sidebar = () => {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { name: 'Tickets', icon: Ticket, path: '/admin/tickets' },
     { name: 'Resources', icon: Layers, path: '/resources' },
+    { name: 'Bookings', icon: Calendar, path: '/admin/bookings' },
+    { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
+    { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'Profile', icon: User, path: '/profile' },
     { name: 'Notifications', icon: Bell, path: '/notifications' },
   ];
