@@ -8,15 +8,17 @@ import {
   AlertCircle, 
   Info, 
   Trash2,
-  MessageSquare // <-- Added this icon
+  MessageSquare,
+  QrCode // <-- Added QR Code icon
 } from 'lucide-react';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // --- NEW STATE FOR THE MESSAGE MODAL ---
+  // --- MODAL STATES ---
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
+  const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '' }); // <-- New QR Modal State
 
   const fetchBookings = () => {
     setLoading(true);
@@ -124,7 +126,18 @@ export default function MyBookings() {
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           
-                          {/* --- NEW: View Message Button (Only shows if adminReason exists) --- */}
+                          {/* --- NEW: View Entry Pass (QR Token) Button --- */}
+                          {booking.status === 'APPROVED' && booking.qrToken && (
+                            <button 
+                              onClick={() => setQrModal({ isOpen: true, token: booking.qrToken, resourceId: booking.resourceId })}
+                              className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="View Entry Pass"
+                            >
+                              <QrCode size={20} />
+                            </button>
+                          )}
+
+                          {/* View Admin Message Button */}
                           {booking.adminReason && (
                             <button 
                               onClick={() => setMessageModal({ isOpen: true, text: booking.adminReason, status: booking.status })}
@@ -175,23 +188,18 @@ export default function MyBookings() {
         </main>
       </div>
 
-      {/* --- NEW: Admin Message Modal --- */}
+      {/* --- Admin Message Modal --- */}
       {messageModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex flex-col items-center text-center">
-              
               <div className={`p-4 rounded-full mb-4 ${messageModal.status === 'APPROVED' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                 <MessageSquare size={32} />
               </div>
-              
               <h3 className="text-xl font-bold text-gray-900 mb-2">Message from Admin</h3>
-              
-              {/* The actual message from the database */}
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 w-full mb-6">
                 <p className="text-gray-700 italic">"{messageModal.text}"</p>
               </div>
-              
               <button 
                 onClick={() => setMessageModal({ isOpen: false, text: '', status: '' })}
                 className="w-full bg-gray-900 text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition-colors"
@@ -202,6 +210,40 @@ export default function MyBookings() {
           </div>
         </div>
       )}
+
+      {/* --- NEW: QR Token/Entry Pass Modal --- */}
+      {qrModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-indigo-50 p-4 rounded-full mb-4 text-indigo-600">
+                <QrCode size={40} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Access Token</h3>
+              <p className="text-sm text-gray-500 mb-6">Resource #{qrModal.resourceId}</p>
+              
+              {/* Displaying the UUID Token clearly */}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 w-full mb-6 break-all">
+                <code className="text-sm font-mono text-indigo-700 font-bold select-all">
+                  {qrModal.token}
+                </code>
+              </div>
+              
+              <p className="text-xs text-gray-400 mb-6 px-4">
+                Present this token code to the security personnel at the resource location for check-in.
+              </p>
+
+              <button 
+                onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '' })}
+                className="w-full bg-indigo-600 text-white font-medium py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

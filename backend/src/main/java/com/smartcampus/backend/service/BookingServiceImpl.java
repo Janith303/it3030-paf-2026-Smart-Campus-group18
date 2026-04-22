@@ -106,4 +106,21 @@ public class BookingServiceImpl implements BookingService {
         stats.put("TOTAL", total);
         return stats;
     }
+
+    @Override
+    public Booking verifyCheckIn(String token) {
+        Booking booking = bookingRepository.findByQrToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid QR Token. No booking found."));
+
+        if (booking.getIsCheckedIn()) {
+            throw new RuntimeException("Warning: This QR code has already been used for check-in!");
+        }
+
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new RuntimeException("Error: This booking is not approved.");
+        }
+
+        booking.setIsCheckedIn(true);
+        return bookingRepository.save(booking);
+    }
 }
