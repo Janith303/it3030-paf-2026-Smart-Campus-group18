@@ -10,7 +10,7 @@ export const Sidebar = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
     { name: 'Tickets', icon: Ticket, path: '/admin/tickets' },
     { name: 'Resources', icon: Layers, path: '/resources' },
     { name: 'Bookings', icon: Calendar, path: '/admin/bookings' },
