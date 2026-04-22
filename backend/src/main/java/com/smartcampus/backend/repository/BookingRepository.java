@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 // MUST have @Repository
 @Repository 
@@ -30,4 +31,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
     @Query("SELECT b.status, COUNT(b) FROM Booking b WHERE b.userId = :userId GROUP BY b.status")
         List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
+
+    Optional<Booking> findByQrToken(String qrToken);
+    List<Booking> findByQrTokenStartingWith(String prefix);
 }
