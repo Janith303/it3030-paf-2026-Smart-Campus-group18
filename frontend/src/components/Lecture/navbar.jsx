@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, Calendar, PlusCircle, 
-  AlertCircle, Search, Bell, User
+  AlertCircle, Search, Bell, User, Layers
 } from 'lucide-react';
 
 export const UserSidebar = () => {
@@ -12,7 +12,8 @@ export const UserSidebar = () => {
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/user' },
     { name: 'My Bookings', icon: Calendar, path: '/user/bookings' },
-    { name: 'Book Resource', icon: PlusCircle, path: '/user/book' }, // We will build this next!
+    { name: 'Book Resource', icon: PlusCircle, path: '/user/book' },
+    { name: 'Resources', icon: Layers, path: '/user/resources' },
     { name: 'My Incidents', icon: AlertCircle, path: '/user/incidents' },
     { name: 'Profile', icon: User, path: '/user/profile' },
   ];
