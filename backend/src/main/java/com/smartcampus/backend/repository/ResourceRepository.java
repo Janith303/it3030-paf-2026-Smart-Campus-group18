@@ -13,16 +13,16 @@ import java.util.List;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
-    List findByType(ResourceType type);
+    List<Resource> findByType(ResourceType type);
 
-    List findByStatus(ResourceStatus status);
+    List<Resource> findByStatus(ResourceStatus status);
 
     @Query("SELECT r FROM Resource r WHERE " +
            "(:type IS NULL OR r.type = :type) AND " +
            "(:minCapacity IS NULL OR r.capacity >= :minCapacity) AND " +
            "(:location IS NULL OR LOWER(r.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
            "(:status IS NULL OR r.status = :status)")
-    List searchResources(
+    List<Resource> searchResources(
         @Param("type") ResourceType type,
         @Param("minCapacity") Integer minCapacity,
         @Param("location") String location,
