@@ -112,22 +112,28 @@ export default function BookResource() {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Layers size={16}/> Select Resource
+                      <Layers size={16}/> {preSelectedResource ? 'Selected Resource' : 'Select Resource'}
                     </label>
-                    <select 
-                      name="resourceId"
-                      value={formData.resourceId}
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer"
-                    >
-                      <option value="" disabled>-- Choose an available resource --</option>
-                      {resources.map((resource) => (
-                        <option key={resource.id} value={resource.id}>
-                          {resource.name} ({resource.location})
-                        </option>
-                      ))}
-                    </select>
+                    {preSelectedResource ? (
+                      <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-gray-700 font-medium">
+                        {preSelectedResource.name}
+                      </div>
+                    ) : (
+                      <select 
+                        name="resourceId"
+                        value={formData.resourceId}
+                        onChange={handleChange}
+                        required
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer"
+                      >
+                        <option value="" disabled>-- Choose an available resource --</option>
+                        {resources.map((resource) => (
+                          <option key={resource.id} value={resource.id}>
+                            {resource.name} ({resource.location})
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
