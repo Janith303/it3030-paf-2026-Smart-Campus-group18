@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { UserSidebar, UserTopbar } from './navbar';
 import { Calendar, Users, FileText, CheckCircle2, AlertCircle, Layers } from 'lucide-react';
 
 export default function BookResource() {
+  const location = useLocation();
+  const preSelectedResource = location.state?.resource;
+  
   const [formData, setFormData] = useState({
-    resourceId: '',
-    resourceName: '', // NEW: Added this to track the name
+    resourceId: preSelectedResource ? preSelectedResource.id.toString() : '',
+    resourceName: preSelectedResource ? preSelectedResource.name : '',
     startTime: '',
     endTime: '',
     purpose: '',
