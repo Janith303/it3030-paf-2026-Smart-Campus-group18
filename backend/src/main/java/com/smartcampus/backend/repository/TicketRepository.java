@@ -7,4 +7,5 @@ import com.smartcampus.backend.model.Ticket;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByAssignedTo(String assignedTo);
     List<Ticket> findByAssignedToAndStatus(String assignedTo, String status);
+    Ticket findTopByOrderByIdDesc();
 }

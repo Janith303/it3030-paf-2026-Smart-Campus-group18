@@ -50,11 +50,17 @@ export default function MyIncidents() {
   const fetchTickets = async () => {
     try {
       const res = await fetch("http://localhost:8080/api/tickets");
+      if (!res.ok) throw new Error("API ERROR");
       const data = await res.json();
-      setTickets(data);
+      
+      console.log("Fetched tickets:", data);
+      
+      const ticketsArray = Array.isArray(data) ? data : [];
+      setTickets(ticketsArray);
       setLoading(false);
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("FETCH ERROR:", err);
+      setTickets([]);
       setLoading(false);
     }
   };

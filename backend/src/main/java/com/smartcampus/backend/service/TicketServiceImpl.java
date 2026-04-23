@@ -1,6 +1,7 @@
 package com.smartcampus.backend.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import com.smartcampus.backend.repository.TicketRepository;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 
 @Service
+@Transactional
 public class TicketServiceImpl implements TicketService {
 
     @Autowired
@@ -24,10 +26,24 @@ public class TicketServiceImpl implements TicketService {
     @Autowired
     private ActivityService activityService;
 
+    private String generateTicketCode() {
+        Ticket last = repo.findTopByOrderByIdDesc();
+        int nextNumber = 1001;
+        if (last != null && last.getTicketCode() != null) {
+            try {
+                String lastCode = last.getTicketCode().replace("TKT-", "");
+                nextNumber = Integer.parseInt(lastCode) + 1;
+            } catch (Exception e) {
+                nextNumber = 1001;
+            }
+        }
+        return "TKT-" + nextNumber;
+    }
+
     @Override
     public Ticket createTicket(TicketRequestDTO dto) {
         Ticket t = new Ticket();
-        t.setTicketCode("TKT-" + (repo.count() + 1001));
+        t.setTicketCode(generateTicketCode());
         t.setLocation(dto.location);
         t.setCategory(dto.category);
         t.setDescription(dto.description);
@@ -55,7 +71,7 @@ public class TicketServiceImpl implements TicketService {
         System.out.println("FILES RECEIVED IN SERVICE: " + files);
 
         Ticket t = new Ticket();
-        t.setTicketCode("TKT-" + (repo.count() + 1001));
+        t.setTicketCode(generateTicketCode());
         t.setLocation(location);
         t.setCategory(category);
         t.setDescription(description);
@@ -144,12 +160,12 @@ public class TicketServiceImpl implements TicketService {
 
         long total = tickets.size();
         long inProgress = tickets.stream()
-                .filter(t -> "IN_PROGRESS".equals(t.getStatus()))
+                .filter(ticket -> "IN_PROGRESS".equals(ticket.getStatus()))
                 .count();
 
         long completedToday = tickets.stream()
-                .filter(t -> "RESOLVED".equals(t.getStatus()))
-                .filter(t -> t.getCreatedAt().toLocalDate()
+                .filter(ticket -> "RESOLVED".equals(ticket.getStatus()))
+                .filter(ticket -> ticket.getCreatedAt().toLocalDate()
                         .equals(LocalDate.now()))
                 .count();
 

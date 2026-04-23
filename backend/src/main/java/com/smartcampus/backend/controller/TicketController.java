@@ -40,12 +40,19 @@ public class TicketController {
             @RequestParam(required = false) String preferredContact,
             @RequestParam(required = false) List<MultipartFile> files
     ) {
-        System.out.println("API HIT: Creating ticket with files - " + description);
+        System.out.println("=== CONTROLLER HIT: Creating ticket ===");
+        System.out.println("Location: " + location);
+        System.out.println("Category: " + category);
+        System.out.println("Description: " + description);
+        
+        Ticket created = ticketService.createTicketWithFiles(
+                location, category, description, priority, preferredContact, files
+        );
+        
+        System.out.println("=== CONTROLLER DONE: Ticket created: " + created.getTicketCode() + " ===");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ticketService.createTicketWithFiles(
-                        location, category, description, priority, preferredContact, files
-                ));
+                .body(created);
     }
 
     @GetMapping
