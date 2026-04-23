@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, CalendarCheck, Clock, FileWarning, AlertCircle, CheckCircle } from 'lucide-react';
+import { Layers, CalendarCheck, Clock, FileWarning, AlertCircle, CheckCircle, TrendingUp, BarChart3 } from 'lucide-react';
 import { Sidebar, Topbar } from './navbar'; 
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar
+  BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 
 export default function Home() {
@@ -11,6 +11,8 @@ export default function Home() {
   const [resourceStats, setResourceStats] = useState({ total: 0, active: 0, outOfService: 0 });
   const [timelineData, setTimelineData] = useState([]);
   const [statusData, setStatusData] = useState([]);
+  const [topResources, setTopResources] = useState([]);
+  const [peakHours, setPeakHours] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/bookings')
@@ -63,6 +65,32 @@ export default function Home() {
         });
       })
       .catch(err => console.error("Error fetching resource stats:", err));
+
+    fetch('http://localhost:8080/api/admin/analytics/top-resources?limit=5')
+      .then(res => res.json())
+      .then(data => {
+        const formatted = data.map((item, idx) => ({
+          name: item[1] || `Resource ${item[0]}`,
+          bookings: parseInt(item[2]) || 0,
+          fill: ['#6366f1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'][idx % 5]
+        }));
+        setTopResources(formatted);
+      })
+      .catch(err => console.error("Error fetching top resources:", err));
+
+    fetch('http://localhost:8080/api/admin/analytics/peak-hours')
+      .then(res => res.json())
+      .then(data => {
+        const formatted = Object.entries(data)
+          .sort(([a], [b]) => parseInt(a) - parseInt(b))
+          .map(([hour, count]) => ({
+            hour: `${hour}:00`,
+            bookings: count,
+            fill: count > 5 ? '#EF4444' : count > 2 ? '#F59E0B' : '#10B981'
+          }));
+        setPeakHours(formatted);
+      })
+      .catch(err => console.error("Error fetching peak hours:", err));
   }, []);
 
   return (
