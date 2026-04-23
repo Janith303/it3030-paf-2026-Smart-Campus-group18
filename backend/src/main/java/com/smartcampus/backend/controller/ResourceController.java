@@ -6,6 +6,7 @@ import com.smartcampus.backend.model.ResourceStatus;
 import com.smartcampus.backend.model.ResourceType;
 import com.smartcampus.backend.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -19,21 +20,37 @@ public class ResourceController {
     private ResourceService resourceService;
 
     @PostMapping
-    public ResponseEntity<ResourceResponseDTO> createResource(@RequestBody ResourceRequestDTO request) {
-        return ResponseEntity.ok(resourceService.createResource(request));
+    public ResponseEntity<?> createResource(@RequestBody ResourceRequestDTO request) {
+        try {
+            ResourceResponseDTO created = resourceService.createResource(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResourceResponseDTO> updateResource(
+    public ResponseEntity<?> updateResource(
             @PathVariable Long id, 
             @RequestBody ResourceRequestDTO request) {
-        return ResponseEntity.ok(resourceService.updateResource(id, request));
+        try {
+            ResourceResponseDTO updated = resourceService.updateResource(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
-        resourceService.deleteResource(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteResource(@PathVariable Long id) {
+        try {
+            resourceService.deleteResource(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/all")
@@ -47,8 +64,13 @@ public class ResourceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResourceResponseDTO> getResourceById(@PathVariable Long id) {
-        return ResponseEntity.ok(resourceService.getResourceById(id));
+    public ResponseEntity<?> getResourceById(@PathVariable Long id) {
+        try {
+            ResourceResponseDTO resource = resourceService.getResourceById(id);
+            return ResponseEntity.ok(resource);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/search")
