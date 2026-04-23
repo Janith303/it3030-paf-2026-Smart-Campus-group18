@@ -2,6 +2,7 @@ package com.smartcampus.backend.service;
 
 import com.smartcampus.backend.dto.ResourceRequestDTO;
 import com.smartcampus.backend.dto.ResourceResponseDTO;
+import com.smartcampus.backend.model.AvailabilityWindow;
 import com.smartcampus.backend.model.Resource;
 import com.smartcampus.backend.model.ResourceStatus;
 import com.smartcampus.backend.model.ResourceType;
