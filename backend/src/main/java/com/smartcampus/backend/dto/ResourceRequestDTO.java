@@ -1,39 +1,18 @@
-package com.smartcampus.backend.model;
+package com.smartcampus.backend.dto;
 
-import jakarta.persistence.*;
+import com.smartcampus.backend.model.AvailabilityWindow;
+import com.smartcampus.backend.model.ResourceStatus;
+import com.smartcampus.backend.model.ResourceType;
 import java.util.List;
 
-@Entity
-@Table(name = "resources")
-public class Resource {
+public class ResourceRequestDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ResourceType type;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
     private Integer capacity;
-
-    @Column(nullable = false)
     private String location;
-
-    @Convert(converter = AvailabilityWindowListConverter.class)
-    @Column(columnDefinition = "TEXT")
     private List<AvailabilityWindow> availabilityWindows;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ResourceStatus status = ResourceStatus.ACTIVE;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    private ResourceStatus status;
 
     public ResourceType getType() { return type; }
     public void setType(ResourceType type) { this.type = type; }
