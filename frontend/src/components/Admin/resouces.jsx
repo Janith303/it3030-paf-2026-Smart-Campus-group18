@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar, Topbar } from './navbar';
-import { Layers, MapPin, Users, Clock, Plus, Edit, Trash2, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Layers, MapPin, Users, Clock, Plus, Edit, Trash2, X, AlertCircle, CheckCircle, Search } from 'lucide-react';
 
 export default function Resources() {
   const [resources, setResources] = useState([]);
+  const [filteredResources, setFilteredResources] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
   const [formData, setFormData] = useState({
@@ -15,16 +16,54 @@ export default function Resources() {
     status: 'ACTIVE'
   });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [filters, setFilters] = useState({
+    type: '',
+    minCapacity: '',
+    location: ''
+  });
 
   useEffect(() => {
     fetchResources();
   }, []);
 
+  useEffect(() => {
+    applyFilters();
+  }, [filters, resources]);
+
   const fetchResources = () => {
     fetch('http://localhost:8080/api/resources/all')
       .then(res => res.json())
-      .then(data => setResources(data))
+      .then(data => {
+        setResources(data);
+        setFilteredResources(data);
+      })
       .catch(err => console.error('Error loading resources:', err));
+  };
+
+  const applyFilters = () => {
+    let filtered = [...resources];
+
+    if (filters.type) {
+      filtered = filtered.filter(r => r.type === filters.type);
+    }
+    if (filters.minCapacity) {
+      filtered = filtered.filter(r => r.capacity >= parseInt(filters.minCapacity));
+    }
+    if (filters.location) {
+      filtered = filtered.filter(r => 
+        r.location.toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+    setFilteredResources(filtered);
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({ type: '', minCapacity: '', location: '' });
   };
 
   const handleInputChange = (e) => {
@@ -154,6 +193,57 @@ export default function Resources() {
               </button>
             </div>
 
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select 
+                    name="type"
+                    value={filters.type}
+                    onChange={handleFilterChange}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  >
+                    <option value="">All Types</option>
+                    <option value="LECTURE_HALL">Lecture Hall</option>
+                    <option value="LAB">Lab</option>
+                    <option value="MEETING_ROOM">Meeting Room</option>
+                    <option value="EQUIPMENT">Equipment</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Capacity</label>
+                  <input 
+                    type="number"
+                    name="minCapacity"
+                    value={filters.minCapacity}
+                    onChange={handleFilterChange}
+                    placeholder="Min people"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input 
+                    type="text"
+                    name="location"
+                    value={filters.location}
+                    onChange={handleFilterChange}
+                    placeholder="Search location..."
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button 
+                    onClick={clearFilters}
+                    className="w-full bg-gray-100 text-gray-700 font-medium rounded-xl px-4 py-2.5 hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Search size={16} />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -167,7 +257,7 @@ export default function Resources() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {resources.map(resource => (
+                  {filteredResources.map(resource => (
                     <tr key={resource.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -230,10 +320,10 @@ export default function Resources() {
                 </tbody>
               </table>
 
-              {resources.length === 0 && (
+              {filteredResources.length === 0 && (
                 <div className="text-center py-12">
                   <Layers size={40} className="mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">No resources found</p>
+                  <p className="text-gray-500">No resources match your filters</p>
                 </div>
               )}
             </div>
