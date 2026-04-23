@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Clock, Loader, CheckCircle, XCircle, 
   Search, Eye, UserPlus, Edit 
@@ -42,6 +43,7 @@ const getStatusBadge = (status) => {
 };
 
 export default function AdminTickets() {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -243,7 +245,11 @@ export default function AdminTickets() {
                       <td className="px-4 py-3 text-sm text-gray-600">{formatDate(ticket.createdAt)}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
-                          <button className="text-indigo-600 hover:text-indigo-800" title="View">
+                          <button 
+                            className="text-indigo-600 hover:text-indigo-800" 
+                            title="View"
+                            onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
+                          >
                             <Eye size={16} />
                           </button>
                           <button 

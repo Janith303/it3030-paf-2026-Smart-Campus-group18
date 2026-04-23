@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.File;
 
 import com.smartcampus.backend.model.Ticket;
@@ -17,6 +20,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Autowired
     private TicketRepository repo;
+
+    @Autowired
+    private ActivityService activityService;
 
     @Override
     public Ticket createTicket(TicketRequestDTO dto) {
@@ -33,6 +39,7 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket saved = repo.save(t);
         System.out.println("SAVED TO DB: " + saved.getTicketCode());
+        activityService.log(saved.getId(), "Ticket created", "CREATED");
         return saved;
     }
 
@@ -90,6 +97,7 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket saved = repo.save(t);
         System.out.println("SAVED TO DB: " + saved.getTicketCode() + " | Attachments: " + saved.getAttachments());
+        activityService.log(saved.getId(), "Ticket created", "CREATED");
         return saved;
     }
 
@@ -110,7 +118,9 @@ public class TicketServiceImpl implements TicketService {
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
         t.setAssignedTo(technician);
         t.setStatus("IN_PROGRESS");
-        return repo.save(t);
+        Ticket saved = repo.save(t);
+        activityService.log(id, "Technician assigned to " + technician, "ASSIGNED");
+        return saved;
     }
 
     @Override
@@ -118,6 +128,55 @@ public class TicketServiceImpl implements TicketService {
         Ticket t = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
         t.setStatus(status);
-        return repo.save(t);
+        Ticket saved = repo.save(t);
+        activityService.log(id, "Status updated to " + status, "STATUS");
+        return saved;
+    }
+
+    @Override
+    public List<Ticket> getTechnicianTickets(String name) {
+        return repo.findByAssignedTo(name);
+    }
+
+    @Override
+    public Map<String, Long> getTechnicianStats(String name) {
+        List<Ticket> tickets = repo.findByAssignedTo(name);
+
+        long total = tickets.size();
+        long inProgress = tickets.stream()
+                .filter(t -> "IN_PROGRESS".equals(t.getStatus()))
+                .count();
+
+        long completedToday = tickets.stream()
+                .filter(t -> "RESOLVED".equals(t.getStatus()))
+                .filter(t -> t.getCreatedAt().toLocalDate()
+                        .equals(LocalDate.now()))
+                .count();
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("assigned", total);
+        stats.put("inProgress", inProgress);
+        stats.put("completedToday", completedToday);
+
+        return stats;
+    }
+
+    @Override
+    public Ticket addResolution(Long id, String notes) {
+        Ticket t = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        t.setStatus("RESOLVED");
+        t.setDescription(t.getDescription() + "\n\nRESOLUTION: " + notes);
+        Ticket saved = repo.save(t);
+        activityService.log(id, "Ticket resolved", "STATUS");
+        return saved;
+    }
+
+    @Override
+    public void deleteTicket(Long id) {
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Ticket not found");
+        }
+        repo.deleteById(id);
     }
 }

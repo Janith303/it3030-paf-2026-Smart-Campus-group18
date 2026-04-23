@@ -8,8 +8,10 @@ import java.util.Map;
 
 import com.smartcampus.backend.service.TicketService;
 import com.smartcampus.backend.service.CommentService;
+import com.smartcampus.backend.service.ActivityService;
 import com.smartcampus.backend.model.Ticket;
 import com.smartcampus.backend.model.Comment;
+import com.smartcampus.backend.model.Activity;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 import com.smartcampus.backend.dto.AssignDTO;
 import com.smartcampus.backend.dto.StatusUpdateDTO;
@@ -21,10 +23,12 @@ public class TicketController {
 
     private final TicketService ticketService;
     private final CommentService commentService;
+    private final ActivityService activityService;
 
-    public TicketController(TicketService ticketService, CommentService commentService) {
+    public TicketController(TicketService ticketService, CommentService commentService, ActivityService activityService) {
         this.ticketService = ticketService;
         this.commentService = commentService;
+        this.activityService = activityService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -82,5 +86,34 @@ public class TicketController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(commentService.addComment(id, author, message));
+    }
+
+    @GetMapping("/technician/{name}")
+    public ResponseEntity<List<Ticket>> getTechTickets(@PathVariable String name) {
+        return ResponseEntity.ok(ticketService.getTechnicianTickets(name));
+    }
+
+    @GetMapping("/technician/{name}/stats")
+    public ResponseEntity<Map<String, Long>> getStats(@PathVariable String name) {
+        return ResponseEntity.ok(ticketService.getTechnicianStats(name));
+    }
+
+    @PutMapping("/{id}/resolve")
+    public ResponseEntity<Ticket> resolve(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(
+                ticketService.addResolution(id, body.get("notes")));
+    }
+
+    @GetMapping("/{id}/activities")
+    public ResponseEntity<List<Activity>> getActivities(@PathVariable Long id) {
+        return ResponseEntity.ok(activityService.getActivities(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        ticketService.deleteTicket(id);
+        return ResponseEntity.ok().body("Ticket deleted successfully");
     }
 }

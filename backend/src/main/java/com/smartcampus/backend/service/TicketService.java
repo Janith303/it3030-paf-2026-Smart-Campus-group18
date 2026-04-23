@@ -1,6 +1,7 @@
 package com.smartcampus.backend.service;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 import com.smartcampus.backend.model.Ticket;
 import com.smartcampus.backend.dto.TicketRequestDTO;
@@ -19,4 +20,8 @@ public interface TicketService {
     Ticket getTicketById(Long id);
     Ticket assignTechnician(Long id, String technician);
     Ticket updateStatus(Long id, String status);
+    List<Ticket> getTechnicianTickets(String name);
+    Map<String, Long> getTechnicianStats(String name);
+    Ticket addResolution(Long id, String notes);
+    void deleteTicket(Long id);
 }

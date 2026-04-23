@@ -14,6 +14,9 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentRepository commentRepo;
 
+    @Autowired
+    private ActivityService activityService;
+
     @Override
     public List<Comment> getComments(Long ticketId) {
         return commentRepo.findByTicketId(ticketId);
@@ -26,6 +29,8 @@ public class CommentServiceImpl implements CommentService {
         c.setAuthor(author);
         c.setMessage(message);
         c.setCreatedAt(LocalDateTime.now());
-        return commentRepo.save(c);
+        Comment saved = commentRepo.save(c);
+        activityService.log(ticketId, "New comment added", "COMMENT");
+        return saved;
     }
 }

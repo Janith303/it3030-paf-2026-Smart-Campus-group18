@@ -59,7 +59,9 @@ export default function MyIncidents() {
     }
   };
 
-  const recentTickets = tickets.slice(-5).reverse();
+  const recentTickets = [...tickets].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
   const totalTickets = tickets.length;
   const openTickets = tickets.filter(t => t.status === "OPEN").length;
