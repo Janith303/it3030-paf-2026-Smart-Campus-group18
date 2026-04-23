@@ -147,10 +147,16 @@ export default function Resources() {
                         <Users size={16} />
                         <span>Capacity: {resource.capacity}</span>
                       </div>
-                      {resource.availabilityWindows && (
-                        <div className="flex items-center gap-2 text-gray-600 text-sm">
-                          <Clock size={16} />
-                          <span className="truncate">{resource.availabilityWindows}</span>
+                      {resource.availabilityWindows && resource.availabilityWindows.length > 0 && (
+                        <div className="flex items-start gap-2 text-gray-600 text-sm">
+                          <Clock size={16} className="mt-0.5" />
+                          <div className="flex flex-wrap gap-1">
+                            {resource.availabilityWindows.map((window, idx) => (
+                              <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded text-xs">
+                                {window.day} {window.startTime}-{window.endTime}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
