@@ -1,6 +1,7 @@
 package com.smartcampus.backend.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "resources")
@@ -23,8 +24,9 @@ public class Resource {
     @Column(nullable = false)
     private String location;
 
+    @Convert(converter = AvailabilityWindowListConverter.class)
     @Column(columnDefinition = "TEXT")
-    private String availabilityWindows;
+    private List<AvailabilityWindow> availabilityWindows;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,8 +47,8 @@ public class Resource {
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 
-    public String getAvailabilityWindows() { return availabilityWindows; }
-    public void setAvailabilityWindows(String availabilityWindows) { this.availabilityWindows = availabilityWindows; }
+    public List<AvailabilityWindow> getAvailabilityWindows() { return availabilityWindows; }
+    public void setAvailabilityWindows(List<AvailabilityWindow> availabilityWindows) { this.availabilityWindows = availabilityWindows; }
 
     public ResourceStatus getStatus() { return status; }
     public void setStatus(ResourceStatus status) { this.status = status; }
