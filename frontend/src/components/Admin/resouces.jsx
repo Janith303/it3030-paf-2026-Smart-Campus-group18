@@ -28,6 +28,8 @@ export default function Resources() {
     status: "ACTIVE",
   });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
   const [filters, setFilters] = useState({
     type: "",
     minCapacity: "",
@@ -80,9 +82,37 @@ export default function Resources() {
     setFilters({ type: "", minCapacity: "", location: "" });
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Resource name is required';
+    } else if (formData.name.trim().length < 3) {
+      newErrors.name = 'Name must be at least 3 characters';
+    }
+
+    if (!formData.capacity || formData.capacity === '') {
+      newErrors.capacity = 'Capacity is required';
+    } else if (!/^\d+$/.test(formData.capacity)) {
+      newErrors.capacity = 'Capacity must be a number';
+    }
+
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    } else if (formData.location.trim().length < 3) {
+      newErrors.location = 'Location must be at least 3 characters';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const openAddModal = () => {
@@ -113,12 +143,17 @@ export default function Resources() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
+
+    if (!validateForm()) {
+      return;
+    }
 
     const payload = {
       type: formData.type,
-      name: formData.name,
+      name: formData.name.trim(),
       capacity: parseInt(formData.capacity),
-      location: formData.location,
+      location: formData.location.trim(),
       availabilityWindows: formData.availabilityWindows,
       status: formData.status,
     };
@@ -138,9 +173,17 @@ export default function Resources() {
       if (response.ok) {
         setShowModal(false);
         fetchResources();
+      } else if (response.status === 400) {
+        const errorMsg = await response.text();
+        setSubmitError(errorMsg || 'Invalid data provided');
+      } else if (response.status === 404) {
+        setSubmitError('Resource not found');
+      } else {
+        setSubmitError('Failed to save resource');
       }
     } catch (error) {
       console.error("Error saving resource:", error);
+      setSubmitError('Failed to connect to server');
     }
   };
 
@@ -446,8 +489,13 @@ export default function Resources() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className={`w-full bg-gray-50 border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 ${
+                    errors.name ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -461,8 +509,15 @@ export default function Resources() {
                     value={formData.capacity}
                     onChange={handleInputChange}
                     required
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    min="1"
+                    max="1000"
+                    className={`w-full bg-gray-50 border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 ${
+                      errors.capacity ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
                   />
+                  {errors.capacity && (
+                    <p className="text-red-500 text-xs mt-1">{errors.capacity}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -490,8 +545,13 @@ export default function Resources() {
                   value={formData.location}
                   onChange={handleInputChange}
                   required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className={`w-full bg-gray-50 border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-600 ${
+                    errors.location ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
+                {errors.location && (
+                  <p className="text-red-500 text-xs mt-1">{errors.location}</p>
+                )}
               </div>
 
               <div>
@@ -569,6 +629,12 @@ export default function Resources() {
                   </div>
                 ))}
               </div>
+
+              {submitError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  {submitError}
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
