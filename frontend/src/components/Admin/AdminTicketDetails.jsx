@@ -350,14 +350,15 @@ export default function AdminTicketDetails() {
               </div>
 
               <div className="bg-white rounded-xl border border-red-100 p-6 shadow-sm">
-                <h4 className="font-semibold text-gray-900 mb-4">Danger Zone</h4>
                 <p className="text-sm text-gray-500 mb-4">Permanently delete this ticket. This action cannot be undone.</p>
-                <button
+                <div className="mt-6">
+                  <button
                   onClick={handleDelete}
                   className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition-colors w-full"
                 >
                   Delete Ticket
                 </button>
+                </div>
               </div>
             </div>
           </div>
