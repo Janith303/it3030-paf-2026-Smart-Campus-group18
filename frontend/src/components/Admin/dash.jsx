@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, CalendarCheck, Clock, FileWarning } from 'lucide-react';
+import { Layers, CalendarCheck, Clock, FileWarning, AlertCircle, CheckCircle } from 'lucide-react';
 import { Sidebar, Topbar } from './navbar'; 
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -8,6 +8,7 @@ import {
 
 export default function Home() {
   const [stats, setStats] = useState({ total: 0, active: 0, pending: 0, rejected: 0 });
+  const [resourceStats, setResourceStats] = useState({ total: 0, active: 0, outOfService: 0 });
   const [timelineData, setTimelineData] = useState([]);
   const [statusData, setStatusData] = useState([]);
 
@@ -51,6 +52,17 @@ export default function Home() {
         setTimelineData(formattedTimeline);
       })
       .catch(err => console.error("Error fetching admin stats:", err));
+
+    fetch('http://localhost:8080/api/admin/analytics/resource-stats')
+      .then(res => res.json())
+      .then(data => {
+        setResourceStats({
+          total: data.total || 0,
+          active: data.active || 0,
+          outOfService: data.outOfService || 0
+        });
+      })
+      .catch(err => console.error("Error fetching resource stats:", err));
   }, []);
 
   return (
@@ -112,6 +124,41 @@ export default function Home() {
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.rejected}</h3>
               <p className="text-xs text-gray-400 font-medium">Unsuccessful requests</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-gray-500 text-sm font-medium">Total Resources</span>
+                <div className="bg-indigo-50 p-2 rounded-lg text-indigo-600">
+                  <Layers size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{resourceStats.total}</h3>
+              <p className="text-xs text-gray-400 font-medium">All resources</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-gray-500 text-sm font-medium">Active Resources</span>
+                <div className="bg-green-50 p-2 rounded-lg text-green-600">
+                  <CheckCircle size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{resourceStats.active}</h3>
+              <p className="text-xs text-gray-400 font-medium">Available</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-gray-500 text-sm font-medium">Out of Service</span>
+                <div className="bg-red-50 p-2 rounded-lg text-red-600">
+                  <AlertCircle size={20} />
+                </div>
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{resourceStats.outOfService}</h3>
+              <p className="text-xs text-gray-400 font-medium">Unavailable</p>
             </div>
           </div>
 
