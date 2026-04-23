@@ -1,7 +1,9 @@
 package com.smartcampus.backend.dto;
 
+import com.smartcampus.backend.model.AvailabilityWindow;
 import com.smartcampus.backend.model.ResourceStatus;
 import com.smartcampus.backend.model.ResourceType;
+import java.util.List;
 
 public class ResourceResponseDTO {
 
@@ -10,7 +12,7 @@ public class ResourceResponseDTO {
     private String name;
     private Integer capacity;
     private String location;
-    private String availabilityWindows;
+    private List<AvailabilityWindow> availabilityWindows;
     private ResourceStatus status;
 
     public Long getId() { return id; }
@@ -28,8 +30,8 @@ public class ResourceResponseDTO {
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 
-    public String getAvailabilityWindows() { return availabilityWindows; }
-    public void setAvailabilityWindows(String availabilityWindows) { this.availabilityWindows = availabilityWindows; }
+    public List<AvailabilityWindow> getAvailabilityWindows() { return availabilityWindows; }
+    public void setAvailabilityWindows(List<AvailabilityWindow> availabilityWindows) { this.availabilityWindows = availabilityWindows; }
 
     public ResourceStatus getStatus() { return status; }
     public void setStatus(ResourceStatus status) { this.status = status; }
