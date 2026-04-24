@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { UserSidebar, UserTopbar } from './navbar';
 import { Calendar, Users, FileText, CheckCircle2, AlertCircle, Layers } from 'lucide-react';
+import api from '../../api/axiosInstance';
 
 export default function BookResource() {
   const [formData, setFormData] = useState({
     resourceId: '',
-    resourceName: '', // NEW: Added this to track the name
+    resourceName: '',
     startTime: '',
     endTime: '',
     purpose: '',
@@ -15,28 +16,24 @@ export default function BookResource() {
   const [resources, setResources] = useState([]); 
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  
-  // NEW: State for the Success Popup
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/resources')
-      .then(response => response.json())
-      .then(data => setResources(data))
+    // Member 4 fix: use axiosInstance so JWT token is attached
+    api.get('/api/resources')
+      .then(response => setResources(response.data))
       .catch(error => console.error("Error loading resources:", error));
   }, []);
 
-  // UPGRADED: Handle Change to grab the text of the selected resource
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'resourceId') {
-      // Find the specific resource object from our fetched array
       const selectedResource = resources.find(r => r.id.toString() === value);
       setFormData({ 
         ...formData, 
         resourceId: value,
-        resourceName: selectedResource ? selectedResource.name : '' // Save the name!
+        resourceName: selectedResource ? selectedResource.name : ''
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -55,11 +52,10 @@ export default function BookResource() {
       return; 
     }
 
-    // UPGRADED: Payload now includes the resourceName
     const payload = {
       userId: 1, 
       resourceId: parseInt(formData.resourceId),
-      resourceName: formData.resourceName, // Sent to backend!
+      resourceName: formData.resourceName,
       startTime: formData.startTime,
       endTime: formData.endTime,
       purpose: formData.purpose,
@@ -67,23 +63,13 @@ export default function BookResource() {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        // Trigger the success popup and reset the form
-        setShowSuccessPopup(true);
-        setFormData({ resourceId: '', resourceName: '', startTime: '', endTime: '', purpose: '', expectedAttendees: '' }); 
-      } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText); 
-        setShowErrorPopup(true);
-      }
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.post('/api/bookings', payload);
+      setShowSuccessPopup(true);
+      setFormData({ resourceId: '', resourceName: '', startTime: '', endTime: '', purpose: '', expectedAttendees: '' }); 
     } catch (error) {
-      setErrorMessage('Failed to connect to the server. Please check if the backend is running.');
+      const errorText = error.response?.data || 'Failed to connect to the server. Please check if the backend is running.';
+      setErrorMessage(errorText); 
       setShowErrorPopup(true);
     }
   };
@@ -201,7 +187,7 @@ export default function BookResource() {
         </div>
       </div>
 
-      {/* --- Error Popup Modal --- */}
+      {/* Error Popup Modal */}
       {showErrorPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -222,7 +208,7 @@ export default function BookResource() {
         </div>
       )}
 
-      {/* --- NEW: Success Popup Modal --- */}
+      {/* Success Popup Modal */}
       {showSuccessPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">

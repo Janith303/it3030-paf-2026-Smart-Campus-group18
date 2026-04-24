@@ -1,36 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { UserSidebar, UserTopbar } from './navbar';
 import { 
-  Calendar, 
-  Clock, 
-  XCircle, 
-  CheckCircle2, 
-  AlertCircle, 
-  Info, 
-  Trash2,
-  MessageSquare,
-  QrCode,
-  Filter,          
-  ArrowUpDown      
+  Calendar, Clock, XCircle, CheckCircle2, 
+  AlertCircle, Info, Trash2, MessageSquare,
+  QrCode, Filter, ArrowUpDown      
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import api from '../../api/axiosInstance';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('NEWEST'); 
-  
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
   const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
 
   const fetchBookings = () => {
     setLoading(true);
-    fetch('http://localhost:8080/api/bookings/user/1') 
-      .then(res => res.json())
-      .then(data => {
-        setBookings(data);
+    // Member 4 fix: use axiosInstance so JWT token is attached
+    api.get('/api/bookings/user/1')
+      .then(res => {
+        setBookings(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -46,11 +37,10 @@ export default function MyBookings() {
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, { method: 'PATCH' });
-      if (response.ok) {
-        alert("Booking cancelled successfully.");
-        fetchBookings(); 
-      }
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.patch(`/api/bookings/${id}/cancel?reason=Cancelled by user`);
+      alert("Booking cancelled successfully.");
+      fetchBookings(); 
     } catch (error) {
       alert("Failed to cancel booking.");
     }
@@ -59,13 +49,10 @@ export default function MyBookings() {
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this record? This cannot be undone.")) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        alert("Record deleted from history.");
-        fetchBookings(); 
-      } else {
-        alert("Failed to delete the record.");
-      }
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.delete(`/api/bookings/${id}`);
+      alert("Record deleted from history.");
+      fetchBookings(); 
     } catch (error) {
       console.error("Error deleting:", error);
       alert("Server error.");
@@ -82,48 +69,34 @@ export default function MyBookings() {
     }
   };
 
-  // UPGRADED: Bulletproof Date Sorting Logic
   const processedBookings = bookings
     .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
     .sort((a, b) => {
-      // Safety check: If a date is missing entirely, push it to the bottom
       if (!a.startTime) return 1;
       if (!b.startTime) return -1;
-
-      // Convert to reliable JavaScript timestamps
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
-
-      // Safety check: If a date is "Invalid Date", ignore the sort for that row
       if (isNaN(dateA) || isNaN(dateB)) return 0;
-
-      // Do the math based on selection
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
   return (
-    // FIXED: min-h-screen and overflow-x-hidden for layout stability
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <UserSidebar />
       
-      {/* FIXED: min-w-0 to prevent flexbox blowout */}
       <div className="flex-1 flex flex-col ml-64 min-w-0">
         <UserTopbar />
         
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             
-            {/* Header Area with Filter and Sort Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
                 <p className="text-gray-500">Track and manage your resource reservations.</p>
               </div>
 
-              {/* Controls */}
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                
-                {/* Filter Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <Filter size={16} className="text-gray-400" />
                   <select 
@@ -139,7 +112,6 @@ export default function MyBookings() {
                   </select>
                 </div>
 
-                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <ArrowUpDown size={16} className="text-gray-400" />
                   <select 
@@ -151,13 +123,10 @@ export default function MyBookings() {
                     <option value="NEWEST">Latest First (Furthest Away)</option>
                   </select>
                 </div>
-
               </div>
             </div>
 
-            {/* --- UPGRADED UX SECTION --- */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full">
-              {/* Added Ghost Scroll styling and whitespace-nowrap */}
               <div className="overflow-x-auto w-full pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                   <thead className="bg-gray-50 border-b border-gray-100">
@@ -194,15 +163,17 @@ export default function MyBookings() {
                             </span>
                           </div>
                         </td>
+
                         <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[200px]">{booking.purpose}</td>
+                        
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(booking.status)}`}>
                             {booking.status}
                           </span>
                         </td>
+
                         <td className="px-6 py-4">
                           <div className="flex justify-end gap-2">
-                            
                             {booking.status === 'APPROVED' && booking.qrToken && (
                               <button 
                                 onClick={() => setQrModal({ 
@@ -244,7 +215,7 @@ export default function MyBookings() {
                               title="Delete Permanently"
                             >
                               <Trash2 size={20} />
-                          </button>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -253,7 +224,6 @@ export default function MyBookings() {
                 </table>
               </div>
 
-              {/* Handled empty state */}
               {processedBookings.length === 0 && !loading && (
                 <div className="p-12 text-center">
                   <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -272,7 +242,7 @@ export default function MyBookings() {
         </main>
       </div>
 
-      {/* --- Admin Message Modal --- */}
+      {/* Admin Message Modal */}
       {messageModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -295,16 +265,14 @@ export default function MyBookings() {
         </div>
       )}
 
-      {/* --- Entry Pass Modal --- */}
+      {/* Entry Pass Modal */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
             <div className="flex flex-col items-center text-center">
-              
               <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
               <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
               <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
-              
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 inline-block">
                 <QRCodeSVG 
                   value={qrModal.token || "ERROR-NO-TOKEN"} 
@@ -312,15 +280,12 @@ export default function MyBookings() {
                   level="H"
                 />
               </div>
-              
               <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
                 Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
               </p>
-
               <p className="text-sm font-medium text-gray-600 mb-6 px-4">
                 Present this QR code to the security personnel for scanning.
               </p>
-
               <button 
                 onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '', resourceName: '' })}
                 className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
@@ -331,7 +296,6 @@ export default function MyBookings() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

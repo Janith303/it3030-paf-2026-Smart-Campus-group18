@@ -14,7 +14,9 @@ import CheckInScreen from "./components/Admin/CheckInScreen";
 import Home from "./components/Home/home";
 import Admindashboard from "./components/Admin/dash";
 
-
+// Member 4 imports
+import Login from "./pages/Login";
+import OAuthCallback from "./pages/OAuthCallback";
 
 function App() {
   return (
@@ -34,6 +36,10 @@ function App() {
           <Route path="/user/incidents/:id" element={<UserTicketDetails />} />
           <Route path="/admin/bookings" element={<AdminBookings />} />
           <Route path="/admin/check-in" element={<CheckInScreen />} />
+
+          {/* Member 4 - Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/oauth2/callback" element={<OAuthCallback />} />
         </Route>
       </Routes>
     </BrowserRouter>
