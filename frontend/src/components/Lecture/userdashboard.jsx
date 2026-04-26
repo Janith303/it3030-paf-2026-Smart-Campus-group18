@@ -97,6 +97,7 @@ export default function UserDashboard() {
                   </Link>
                 </div>
 
+
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-4">Support</h3>
                   <p className="text-sm text-gray-500 mb-4">Having trouble with a resource? Contact the IT helpdesk.</p>
