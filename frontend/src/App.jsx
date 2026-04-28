@@ -4,7 +4,6 @@ import AdminTickets from "./components/Admin/tickets";
 import AssignedTickets from "./components/Technician/AssignedTickets";
 import Resources from "./components/Admin/resouces";
 import AdminTicketDetails from "./components/Admin/AdminTicketDetails";
-import AssignedTickets from "./components/Technician/AssignedTickets";
 import AdminResources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
 import MyBookings from "./components/Lecture/mybooking";

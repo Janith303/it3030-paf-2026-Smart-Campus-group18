@@ -4,12 +4,6 @@ import { Upload, X } from 'lucide-react';
 import { UserSidebar, UserTopbar } from '../Lecture/navbar';
 
 const locations = [
-  "Engineering Building - Lab 101",
-  "Engineering Building - Lab 204",
-  "Science Building - Room 301",
-  "Main Building - Lecture Hall A",
-  "Library - Study Area",
-  "IT Lab - Computer Lab 2"
   "Main Building - Lab 101",
   "Main Building - Lab 204",
   "Computer Lab - A403",
@@ -39,7 +33,6 @@ export default function UserCreateIncident() {
     category: "",
     description: "",
     priority: "",
-    contact: ""
     preferredContact: ""
   });
   const [files, setFiles] = useState([]);
@@ -83,11 +76,6 @@ export default function UserCreateIncident() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    console.log("Form submitted:", { ...formData, files });
-    alert("Ticket submitted successfully!");
 const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -256,8 +244,6 @@ const handleSubmit = async (e) => {
                   </label>
                   <input
                     type="text"
-                    name="contact"
-                    value={formData.contact}
                     name="preferredContact"
                     value={formData.preferredContact}
                     onChange={handleChange}

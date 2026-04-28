@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import NotificationBell from '../Notification/NotificationBell';
 import { 
   Ticket,
   Building2, LayoutDashboard, Layers, 
-  AlertCircle, Search, User, Calendar, ScanLine
+  AlertCircle, Search, User,Bell, Calendar, ScanLine
 } from 'lucide-react';
-import NotificationBell from '../Notification/NotificationBell';
- Building2, LayoutDashboard, Layers, 
-  AlertCircle, Search, Bell, User, Calendar, ScanLine
-} from 'lucide-react';
+
 
 export const Sidebar = () => {
   const location = useLocation();

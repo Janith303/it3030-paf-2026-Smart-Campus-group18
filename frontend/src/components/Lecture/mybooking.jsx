@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserSidebar, UserTopbar } from './navbar';
-import { 
-  Calendar, Clock, XCircle, CheckCircle2, 
-  AlertCircle, Info, Trash2, MessageSquare,
-  QrCode, Filter, ArrowUpDown      
-} from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/axiosInstance';
+import { 
   Calendar, 
   Clock, 
   XCircle, 
@@ -24,8 +19,6 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('ALL');
-  const [sortOrder, setSortOrder] = useState('NEWEST'); 
   
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('NEWEST'); 
@@ -33,22 +26,17 @@ export default function MyBookings() {
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
   const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
 
-  const fetchBookings = () => {
+  const fetchBookings = async () => {
     setLoading(true);
-    // Member 4 fix: use axiosInstance so JWT token is attached
-    api.get('/api/bookings/user/1')
-      .then(res => {
-        setBookings(res.data);
-    fetch('http://localhost:8080/api/bookings/user/1') 
-      .then(res => res.json())
-      .then(data => {
-        setBookings(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching bookings:", err);
-        setLoading(false);
-      });
+    try {
+      // Using teammate's Axios instance
+      const res = await api.get('/api/bookings/user/1');
+      setBookings(res.data);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -58,15 +46,9 @@ export default function MyBookings() {
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
     try {
-      // Member 4 fix: use axiosInstance so JWT token is attached
       await api.patch(`/api/bookings/${id}/cancel?reason=Cancelled by user`);
       alert("Booking cancelled successfully.");
       fetchBookings(); 
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, { method: 'PATCH' });
-      if (response.ok) {
-        alert("Booking cancelled successfully.");
-        fetchBookings(); 
-      }
     } catch (error) {
       alert("Failed to cancel booking.");
     }
@@ -75,17 +57,9 @@ export default function MyBookings() {
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this record? This cannot be undone.")) return;
     try {
-      // Member 4 fix: use axiosInstance so JWT token is attached
       await api.delete(`/api/bookings/${id}`);
       alert("Record deleted from history.");
       fetchBookings(); 
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        alert("Record deleted from history.");
-        fetchBookings(); 
-      } else {
-        alert("Failed to delete the record.");
-      }
     } catch (error) {
       console.error("Error deleting:", error);
       alert("Server error.");
@@ -102,30 +76,18 @@ export default function MyBookings() {
     }
   };
 
+  // Bulletproof Date Sorting Logic
   const processedBookings = bookings
     .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
     .sort((a, b) => {
       if (!a.startTime) return 1;
       if (!b.startTime) return -1;
-      const dateA = new Date(a.startTime).getTime();
-      const dateB = new Date(b.startTime).getTime();
-      if (isNaN(dateA) || isNaN(dateB)) return 0;
-  // UPGRADED: Bulletproof Date Sorting Logic
-  const processedBookings = bookings
-    .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
-    .sort((a, b) => {
-      // Safety check: If a date is missing entirely, push it to the bottom
-      if (!a.startTime) return 1;
-      if (!b.startTime) return -1;
 
-      // Convert to reliable JavaScript timestamps
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
 
-      // Safety check: If a date is "Invalid Date", ignore the sort for that row
       if (isNaN(dateA) || isNaN(dateB)) return 0;
 
-      // Do the math based on selection
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
@@ -146,7 +108,6 @@ export default function MyBookings() {
                 <p className="text-gray-500">Track and manage your resource reservations.</p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               {/* Controls */}
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 
@@ -166,6 +127,7 @@ export default function MyBookings() {
                   </select>
                 </div>
 
+                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <ArrowUpDown size={16} className="text-gray-400" />
                   <select 
@@ -177,6 +139,7 @@ export default function MyBookings() {
                     <option value="NEWEST">Latest First (Furthest Away)</option>
                   </select>
                 </div>
+
               </div>
             </div>
 
@@ -217,17 +180,15 @@ export default function MyBookings() {
                             </span>
                           </div>
                         </td>
-
                         <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[200px]">{booking.purpose}</td>
-                        
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusStyle(booking.status)}`}>
                             {booking.status}
                           </span>
                         </td>
-
                         <td className="px-6 py-4">
                           <div className="flex justify-end gap-2">
+                            
                             {booking.status === 'APPROVED' && booking.qrToken && (
                               <button 
                                 onClick={() => setQrModal({ 
@@ -320,14 +281,10 @@ export default function MyBookings() {
       )}
 
       {/* Entry Pass Modal */}
-      {/* --- Entry Pass Modal --- */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
             <div className="flex flex-col items-center text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
-              <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
-              <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
               
               <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
               <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
@@ -340,12 +297,6 @@ export default function MyBookings() {
                   level="H"
                 />
               </div>
-              <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
-                Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
-              </p>
-              <p className="text-sm font-medium text-gray-600 mb-6 px-4">
-                Present this QR code to the security personnel for scanning.
-              </p>
               
               <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
                 Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}

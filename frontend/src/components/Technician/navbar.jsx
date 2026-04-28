@@ -1,12 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import NotificationBell from '../Notification/NotificationBell';
 import { 
   Building2, ClipboardList, 
-  Search, User
+  Search, User, Bell
 } from 'lucide-react';
-import NotificationBell from '../Notification/NotificationBell';
-  Search, Bell, User
-} from 'lucide-react';
+
 
 export const TechnicianSidebar = () => {
   const location = useLocation();
