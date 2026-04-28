@@ -20,7 +20,6 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtAuthFilter jwtAuthFilter;
 
-    // Explicit constructor
     public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler, JwtAuthFilter jwtAuthFilter) {
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
         this.jwtAuthFilter = jwtAuthFilter;
@@ -34,11 +33,17 @@ public class SecurityConfig {
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login/**", "/oauth2/**", "/api/public/**").permitAll()
+                .requestMatchers(
+                    "/login/**",
+                    "/oauth2/**",
+                    "/api/public/**",
+                    "/error"
+                ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
                 .successHandler(oAuth2SuccessHandler)
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

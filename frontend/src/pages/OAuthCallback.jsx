@@ -1,18 +1,24 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function OAuthCallback() {
-  const navigate = useNavigate();
-
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
 
-    if (token) {
-      localStorage.setItem("token", token);
-      navigate("/user"); // redirect to user dashboard after login
-    } else {
-      navigate("/login");
+      console.log("Token received:", token); // for debugging
+
+      if (token && token.length > 0) {
+        localStorage.setItem("token", token);
+        console.log("Token saved, redirecting...");
+        window.location.replace("/user");
+      } else {
+        console.log("No token found, redirecting to login...");
+        window.location.replace("/login");
+      }
+    } catch (err) {
+      console.error("OAuth callback error:", err);
+      window.location.replace("/login");
     }
   }, []);
 
