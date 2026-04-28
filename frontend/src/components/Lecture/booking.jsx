@@ -7,6 +7,17 @@ export default function BookResource() {
   const [formData, setFormData] = useState({
     resourceId: '',
     resourceName: '',
+import { useLocation } from 'react-router-dom';
+import { UserSidebar, UserTopbar } from './navbar';
+import { Calendar, Users, FileText, CheckCircle2, AlertCircle, Layers } from 'lucide-react';
+
+export default function BookResource() {
+  const location = useLocation();
+  const preSelectedResource = location.state?.resource;
+  
+  const [formData, setFormData] = useState({
+    resourceId: preSelectedResource ? preSelectedResource.id.toString() : '',
+    resourceName: preSelectedResource ? preSelectedResource.name : '',
     startTime: '',
     endTime: '',
     purpose: '',
@@ -25,15 +36,29 @@ export default function BookResource() {
       .catch(error => console.error("Error loading resources:", error));
   }, []);
 
+  
+  // NEW: State for the Success Popup
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/resources')
+      .then(response => response.json())
+      .then(data => setResources(data))
+      .catch(error => console.error("Error loading resources:", error));
+  }, []);
+
+  // UPGRADED: Handle Change to grab the text of the selected resource
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'resourceId') {
+      // Find the specific resource object from our fetched array
       const selectedResource = resources.find(r => r.id.toString() === value);
       setFormData({ 
         ...formData, 
         resourceId: value,
         resourceName: selectedResource ? selectedResource.name : ''
+        resourceName: selectedResource ? selectedResource.name : '' // Save the name!
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -56,6 +81,11 @@ export default function BookResource() {
       userId: 1, 
       resourceId: parseInt(formData.resourceId),
       resourceName: formData.resourceName,
+    // UPGRADED: Payload now includes the resourceName
+    const payload = {
+      userId: 1, 
+      resourceId: parseInt(formData.resourceId),
+      resourceName: formData.resourceName, // Sent to backend!
       startTime: formData.startTime,
       endTime: formData.endTime,
       purpose: formData.purpose,
@@ -70,6 +100,23 @@ export default function BookResource() {
     } catch (error) {
       const errorText = error.response?.data || 'Failed to connect to the server. Please check if the backend is running.';
       setErrorMessage(errorText); 
+      const response = await fetch('http://localhost:8080/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        // Trigger the success popup and reset the form
+        setShowSuccessPopup(true);
+        setFormData({ resourceId: '', resourceName: '', startTime: '', endTime: '', purpose: '', expectedAttendees: '' }); 
+      } else {
+        const errorText = await response.text();
+        setErrorMessage(errorText); 
+        setShowErrorPopup(true);
+      }
+    } catch (error) {
+      setErrorMessage('Failed to connect to the server. Please check if the backend is running.');
       setShowErrorPopup(true);
     }
   };
@@ -110,6 +157,28 @@ export default function BookResource() {
                         </option>
                       ))}
                     </select>
+                      <Layers size={16}/> {preSelectedResource ? 'Selected Resource' : 'Select Resource'}
+                    </label>
+                    {preSelectedResource ? (
+                      <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-gray-700 font-medium">
+                        {preSelectedResource.name}
+                      </div>
+                    ) : (
+                      <select 
+                        name="resourceId"
+                        value={formData.resourceId}
+                        onChange={handleChange}
+                        required
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all cursor-pointer"
+                      >
+                        <option value="" disabled>-- Choose an available resource --</option>
+                        {resources.map((resource) => (
+                          <option key={resource.id} value={resource.id}>
+                            {resource.name} ({resource.location})
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -188,6 +257,7 @@ export default function BookResource() {
       </div>
 
       {/* Error Popup Modal */}
+      {/* --- Error Popup Modal --- */}
       {showErrorPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -209,6 +279,7 @@ export default function BookResource() {
       )}
 
       {/* Success Popup Modal */}
+      {/* --- NEW: Success Popup Modal --- */}
       {showSuccessPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">

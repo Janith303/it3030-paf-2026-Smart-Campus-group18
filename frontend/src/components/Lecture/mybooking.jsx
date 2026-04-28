@@ -7,12 +7,29 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import api from '../../api/axiosInstance';
+  Calendar, 
+  Clock, 
+  XCircle, 
+  CheckCircle2, 
+  AlertCircle, 
+  Info, 
+  Trash2,
+  MessageSquare,
+  QrCode,
+  Filter,          
+  ArrowUpDown      
+} from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('NEWEST'); 
+  
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [sortOrder, setSortOrder] = useState('NEWEST'); 
+  
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
   const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
 
@@ -22,6 +39,10 @@ export default function MyBookings() {
     api.get('/api/bookings/user/1')
       .then(res => {
         setBookings(res.data);
+    fetch('http://localhost:8080/api/bookings/user/1') 
+      .then(res => res.json())
+      .then(data => {
+        setBookings(data);
         setLoading(false);
       })
       .catch(err => {
@@ -41,6 +62,11 @@ export default function MyBookings() {
       await api.patch(`/api/bookings/${id}/cancel?reason=Cancelled by user`);
       alert("Booking cancelled successfully.");
       fetchBookings(); 
+      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, { method: 'PATCH' });
+      if (response.ok) {
+        alert("Booking cancelled successfully.");
+        fetchBookings(); 
+      }
     } catch (error) {
       alert("Failed to cancel booking.");
     }
@@ -53,6 +79,13 @@ export default function MyBookings() {
       await api.delete(`/api/bookings/${id}`);
       alert("Record deleted from history.");
       fetchBookings(); 
+      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        alert("Record deleted from history.");
+        fetchBookings(); 
+      } else {
+        alert("Failed to delete the record.");
+      }
     } catch (error) {
       console.error("Error deleting:", error);
       alert("Server error.");
@@ -77,6 +110,22 @@ export default function MyBookings() {
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
       if (isNaN(dateA) || isNaN(dateB)) return 0;
+  // UPGRADED: Bulletproof Date Sorting Logic
+  const processedBookings = bookings
+    .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
+    .sort((a, b) => {
+      // Safety check: If a date is missing entirely, push it to the bottom
+      if (!a.startTime) return 1;
+      if (!b.startTime) return -1;
+
+      // Convert to reliable JavaScript timestamps
+      const dateA = new Date(a.startTime).getTime();
+      const dateB = new Date(b.startTime).getTime();
+
+      // Safety check: If a date is "Invalid Date", ignore the sort for that row
+      if (isNaN(dateA) || isNaN(dateB)) return 0;
+
+      // Do the math based on selection
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
@@ -90,6 +139,7 @@ export default function MyBookings() {
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             
+            {/* Header Area with Filter and Sort Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
@@ -97,6 +147,10 @@ export default function MyBookings() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              {/* Controls */}
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                
+                {/* Filter Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <Filter size={16} className="text-gray-400" />
                   <select 
@@ -266,6 +320,7 @@ export default function MyBookings() {
       )}
 
       {/* Entry Pass Modal */}
+      {/* --- Entry Pass Modal --- */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
@@ -273,6 +328,11 @@ export default function MyBookings() {
               <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
               <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
               <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
+              <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
+              <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
+              
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 inline-block">
                 <QRCodeSVG 
                   value={qrModal.token || "ERROR-NO-TOKEN"} 
@@ -286,6 +346,15 @@ export default function MyBookings() {
               <p className="text-sm font-medium text-gray-600 mb-6 px-4">
                 Present this QR code to the security personnel for scanning.
               </p>
+              
+              <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
+                Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
+              </p>
+
+              <p className="text-sm font-medium text-gray-600 mb-6 px-4">
+                Present this QR code to the security personnel for scanning.
+              </p>
+
               <button 
                 onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '', resourceName: '' })}
                 className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
@@ -296,6 +365,7 @@ export default function MyBookings() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

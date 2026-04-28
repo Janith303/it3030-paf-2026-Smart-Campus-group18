@@ -12,9 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 // MUST have @Repository
-@Repository 
-// MUST be an interface, and MUST extend JpaRepository
-public interface BookingRepository extends JpaRepository<Booking, Long> { 
+@Repository
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByUserId(Long userId);
 
@@ -33,5 +32,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
 
     Optional<Booking> findByQrToken(String qrToken);
+
+    @Query("SELECT b.status, COUNT(b) FROM Booking b WHERE b.userId = :userId GROUP BY b.status")
+    List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
+
+    @Query(value = "SELECT b.resource_id, b.resource_name, COUNT(*) as cnt FROM bookings b " +
+           "WHERE b.status = 'APPROVED' GROUP BY b.resource_id, b.resource_name ORDER BY cnt DESC LIMIT :limit", nativeQuery = true)
+    List<Object[]> getTopResources(@Param("limit") int limit);
+
+    Optional<Booking> findByQrToken(String qrToken);
+
     List<Booking> findByQrTokenStartingWith(String prefix);
 }

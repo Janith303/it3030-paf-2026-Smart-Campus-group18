@@ -68,6 +68,23 @@ const getPriorityBadge = (priority) => {
   };
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[priority]}`}>
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Clock, Loader, CheckCircle, XCircle, 
+  Search, Eye, UserPlus, Edit 
+} from "lucide-react";
+import { Sidebar, Topbar } from "./navbar";
+
+const getPriorityBadge = (priority) => {
+  const styles = {
+    HIGH: "bg-red-100 text-red-700",
+    MEDIUM: "bg-blue-100 text-blue-700",
+    LOW: "bg-green-100 text-green-700",
+    Urgent: "bg-orange-100 text-orange-700"
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[priority] || "bg-gray-100 text-gray-700"}`}>
       {priority}
     </span>
   );
@@ -83,11 +100,29 @@ const getStatusBadge = (status) => {
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>
       {status}
+    OPEN: "bg-blue-100 text-blue-700",
+    IN_PROGRESS: "bg-yellow-100 text-yellow-700",
+    RESOLVED: "bg-green-100 text-green-700",
+    REJECTED: "bg-red-100 text-red-700",
+    CLOSED: "bg-gray-100 text-gray-700"
+  };
+  const labels = {
+    OPEN: "Open",
+    IN_PROGRESS: "In Progress",
+    RESOLVED: "Resolved",
+    REJECTED: "Rejected",
+    CLOSED: "Closed"
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-700"}`}>
+      {labels[status] || status}
     </span>
   );
 };
 
 export default function AdminTickets() {
+  const navigate = useNavigate();
+  const [tickets, setTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
@@ -106,6 +141,104 @@ export default function AdminTickets() {
 
   return (
     <div className="flex main-h-screen bg-gray-50">
+  const [technician, setTechnician] = useState("");
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/tickets");
+      const data = await res.json();
+      console.log("Fetched tickets:", data);
+      setTickets(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setLoading(false);
+    }
+  };
+
+  const filteredTickets = tickets.filter(ticket => {
+    const matchesSearch = !searchTerm || 
+      ticket.ticketCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || ticket.status === statusFilter;
+    const matchesPriority = !priorityFilter || ticket.priority === priorityFilter;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const openCount = tickets.filter(t => t.status === "OPEN").length;
+  const inProgressCount = tickets.filter(t => t.status === "IN_PROGRESS").length;
+  const resolvedCount = tickets.filter(t => t.status === "RESOLVED").length;
+  const rejectedCount = tickets.filter(t => t.status === "REJECTED").length;
+
+  const statCards = [
+    { label: "Open", value: openCount, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "In Progress", value: inProgressCount, icon: Loader, color: "text-yellow-600", bg: "bg-yellow-50" },
+    { label: "Resolved", value: resolvedCount, icon: CheckCircle, color: "text-green-600", bg: "bg-green-50" },
+    { label: "Rejected", value: rejectedCount, icon: XCircle, color: "text-red-600", bg: "bg-red-50" }
+  ];
+
+  const handleAssign = async () => {
+    if (!technician) {
+      alert("Please select a technician");
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:8080/api/tickets/${selectedTicket.id}/assign`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedTo: technician })
+      });
+      if (res.ok) {
+        alert("Technician assigned successfully");
+        setShowModal(false);
+        setTechnician("");
+        fetchTickets();
+      }
+    } catch (err) {
+      console.error("Assign error:", err);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!newStatus) {
+      alert("Please select a status");
+      return;
+    }
+    try {
+      const res = await fetch(`http://localhost:8080/api/tickets/${selectedTicket.id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        alert("Status updated successfully");
+        setShowUpdateModal(false);
+        setNewStatus("");
+        fetchTickets();
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 flex flex-col ml-64">
         <Topbar />
@@ -154,6 +287,11 @@ export default function AdminTickets() {
                   <option value="In Progress">In Progress</option>
                   <option value="Resolved">Resolved</option>
                   <option value="Rejected">Rejected</option>
+                  <option value="OPEN">Open</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="RESOLVED">Resolved</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="CLOSED">Closed</option>
                 </select>
                 <select
                   value={priorityFilter}
@@ -165,6 +303,9 @@ export default function AdminTickets() {
                   <option value="Medium">Medium</option>
                   <option value="Low">Low</option>
                   <option value="Urgent">Urgent</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
                 </select>
               </div>
             </div>
@@ -227,6 +368,71 @@ export default function AdminTickets() {
                 ))}
               </tbody>
             </table>
+            {loading ? (
+              <div className="p-8 text-center text-gray-500">Loading tickets...</div>
+            ) : filteredTickets.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No tickets found</div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned To</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredTickets.map((ticket) => (
+                    <tr key={ticket.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-indigo-600">{ticket.ticketCode}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{ticket.category}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{ticket.location}</td>
+                      <td className="px-4 py-3">{getPriorityBadge(ticket.priority)}</td>
+                      <td className="px-4 py-3">{getStatusBadge(ticket.status)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{ticket.assignedTo}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(ticket.createdAt)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button 
+                            className="text-indigo-600 hover:text-indigo-800" 
+                            title="View"
+                            onClick={() => navigate(`/admin/tickets/${ticket.id}`)}
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button 
+                            className="text-blue-600 hover:text-blue-800" 
+                            title="Assign"
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setShowModal(true);
+                            }}
+                          >
+                            <UserPlus size={16} />
+                          </button>
+                          <button 
+                            className="text-gray-600 hover:text-gray-800" 
+                            title="Update"
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setNewStatus("");
+                              setShowUpdateModal(true);
+                            }}
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </main>
       </div>
@@ -263,6 +469,26 @@ export default function AdminTickets() {
 
             <div className="flex gap-3">
               <button className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity">
+            <p className="mb-5 text-gray-900 font-medium">{selectedTicket?.ticketCode}</p>
+
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Technician</label>
+            <select 
+              value={technician}
+              onChange={(e) => setTechnician(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg py-2.5 px-3 mb-6 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="">Choose a technician</option>
+              <option value="Mike Johnson">Mike Johnson</option>
+              <option value="Tom Anderson">Tom Anderson</option>
+              <option value="John Davis">John Davis</option>
+              <option value="Tom Wilson">Tom Wilson</option>
+            </select>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={handleAssign}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
+              >
                 Assign
               </button>
               <button
@@ -299,6 +525,7 @@ export default function AdminTickets() {
             <p className="text-sm text-gray-500">Ticket ID</p>
             <p className="mb-4 font-medium text-gray-900">
               {selectedTicket?.id}
+              {selectedTicket?.ticketCode}
             </p>
 
             <p className="text-sm text-gray-600 mb-1">Current Status</p>
@@ -306,6 +533,7 @@ export default function AdminTickets() {
               <span className="px-2 py-1 text-sm bg-blue-100 text-blue-600 rounded">
                 {selectedTicket?.status || "Open"}
               </span>
+              {getStatusBadge(selectedTicket?.status)}
             </div>
 
             <label className="text-sm text-gray-600">New Status</label>
@@ -315,6 +543,7 @@ export default function AdminTickets() {
               className="w-full border border-gray-300 rounded-lg p-2.5 mt-1 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select new status</option>
+              <option value="OPEN">Open</option>
               <option value="IN_PROGRESS">In Progress</option>
               <option value="RESOLVED">Resolved</option>
               <option value="CLOSED">Closed</option>
@@ -336,6 +565,8 @@ export default function AdminTickets() {
                 onClick={() => {
                   setShowUpdateModal(false);
                 }}
+                onClick={handleUpdateStatus}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition duration-200"
               >
                 Update Status
               </button>

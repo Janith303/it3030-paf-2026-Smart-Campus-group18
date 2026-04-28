@@ -6,6 +6,9 @@ import {
   AlertCircle, Search, User, Calendar, ScanLine
 } from 'lucide-react';
 import NotificationBell from '../Notification/NotificationBell';
+ Building2, LayoutDashboard, Layers, 
+  AlertCircle, Search, Bell, User, Calendar, ScanLine
+} from 'lucide-react';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -18,6 +21,7 @@ export const Sidebar = () => {
     { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
     { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'Profile', icon: User, path: '/profile' },
+    { name: 'Notifications', icon: Bell, path: '/notifications' },
   ];
 
   return (
@@ -86,6 +90,12 @@ export const Topbar = () => {
         {/* Member 4 — Real notification bell replaces the old static button */}
         <NotificationBell />
 
+        <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
+            3
+          </span>
+        </button>
         <button className="bg-indigo-600 text-white h-9 w-9 rounded-full flex items-center justify-center shadow-sm">
           <User size={18} />
         </button>

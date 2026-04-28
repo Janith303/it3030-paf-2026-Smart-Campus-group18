@@ -2,17 +2,18 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, Calendar, PlusCircle, 
-  AlertCircle, Search, User
+  AlertCircle, Search, Bell, User, Layers
 } from 'lucide-react';
-import NotificationBell from '../Notification/NotificationBell';
 
 export const UserSidebar = () => {
   const location = useLocation();
 
+  // Tailored for the regular user
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/user' },
     { name: 'My Bookings', icon: Calendar, path: '/user/bookings' },
-    { name: 'Book Resource', icon: PlusCircle, path: '/user/book' },
+    //{ name: 'Book Resource', icon: PlusCircle, path: '/user/book' },
+    { name: 'Resources', icon: Layers, path: '/user/resources' },
     { name: 'My Incidents', icon: AlertCircle, path: '/user/incidents' },
     { name: 'Profile', icon: User, path: '/user/profile' },
   ];

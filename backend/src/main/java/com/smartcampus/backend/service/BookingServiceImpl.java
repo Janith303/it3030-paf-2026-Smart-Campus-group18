@@ -6,6 +6,7 @@ import com.smartcampus.backend.model.NotificationType;
 import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.repository.BookingRepository;
 import com.smartcampus.backend.repository.UserRepository;
+import com.smartcampus.backend.repository.BookingRepository;
 import com.smartcampus.backend.dto.BookingRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setAdminReason(reason);
 
         // Innovation feature: Generate QR token on Approval
+        // Innovation feature: Generate QR token on Approval [cite: 119]
         if (newStatus == BookingStatus.APPROVED && booking.getQrToken() == null) {
             booking.setQrToken(UUID.randomUUID().toString());
         }
@@ -93,6 +95,7 @@ public class BookingServiceImpl implements BookingService {
         });
 
         return saved;
+        return bookingRepository.save(booking);
     }
 
     @Override
@@ -127,10 +130,12 @@ public class BookingServiceImpl implements BookingService {
         });
 
         return saved;
+        return bookingRepository.save(booking);
     }
 
     @Override
     public void deleteBooking(Long id) {
+        // Check if it exists before deleting to avoid errors
         if (!bookingRepository.existsById(id)) {
             throw new RuntimeException("Booking not found with id: " + id);
         }
@@ -142,6 +147,7 @@ public class BookingServiceImpl implements BookingService {
         List<Object[]> results = bookingRepository.getBookingStatsByUserId(userId);
         Map<String, Long> stats = new HashMap<>();
         
+        // Initialize with zeros so the frontend doesn't get 'null'
         stats.put("TOTAL", 0L);
         stats.put("PENDING", 0L);
         stats.put("APPROVED", 0L);
@@ -163,9 +169,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking;
 
         if (token.length() < 36) {
+        if (token.length() < 36) {
             List<Booking> matches = bookingRepository.findByQrTokenStartingWith(token);
             
-            if (matches.isEmpty()) {
                 throw new RuntimeException("Invalid Pass ID. No booking found.");
             }
             if (matches.size() > 1) {
@@ -174,18 +180,25 @@ public class BookingServiceImpl implements BookingService {
             booking = matches.get(0);
             
         } else {
+            booking = matches.get(0); // Grab the exact match
+            
+        } else {
+            // It's a full camera scan! Search for the exact UUID
             booking = bookingRepository.findByQrToken(token)
                     .orElseThrow(() -> new RuntimeException("Invalid QR Token. No booking found."));
         }
 
+        // 2. Security Validation
         if (booking.getIsCheckedIn()) {
             throw new RuntimeException("Warning: This pass has already been used for check-in!");
         }
 
+        // (Ensure this matches however you defined your status, either Enum or String)
         if (!"APPROVED".equals(booking.getStatus().toString())) { 
             throw new RuntimeException("Error: This booking is not approved.");
         }
 
+        // 3. Mark as checked in
         booking.setIsCheckedIn(true);
         booking.setCheckInTime(java.time.LocalDateTime.now());
         return bookingRepository.save(booking);

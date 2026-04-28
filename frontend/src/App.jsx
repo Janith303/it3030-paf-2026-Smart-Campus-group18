@@ -3,6 +3,9 @@ import Dash from "./components/Admin/dash";
 import AdminTickets from "./components/Admin/tickets";
 import AssignedTickets from "./components/Technician/AssignedTickets";
 import Resources from "./components/Admin/resouces";
+import AdminTicketDetails from "./components/Admin/AdminTicketDetails";
+import AssignedTickets from "./components/Technician/AssignedTickets";
+import AdminResources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
 import MyBookings from "./components/Lecture/mybooking";
 import UserDashboard from "./components/Lecture/userdashboard";
@@ -17,6 +20,9 @@ import Admindashboard from "./components/Admin/dash";
 // Member 4 imports
 import Login from "./pages/Login";
 import OAuthCallback from "./pages/OAuthCallback";
+import UserResources from "./components/Lecture/Resources";
+
+
 
 function App() {
   return (
@@ -31,6 +37,15 @@ function App() {
           <Route path="/user/book" element={<BookResource />} />
           <Route path="/user/bookings" element={<MyBookings />} />
           <Route path="/user" element={<UserDashboard />} />
+          <Route path="/admin/tickets/:id" element={<AdminTicketDetails />} />
+          <Route path="/technician/tickets" element={<AssignedTickets />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/admin/dashboard" element={<Admindashboard />} />
+          <Route path="/resources" element={<AdminResources />} />
+          <Route path="/user/book" element={<BookResource />} />
+          <Route path="/user/bookings" element={<MyBookings />} />
+          <Route path="/user" element={<UserDashboard />} />
+          <Route path="/user/resources" element={<UserResources />} />
           <Route path="/user/incidents" element={<MyIncidents />} />
           <Route path="/user/incidents/create" element={<UserCreateIncident />} />
           <Route path="/user/incidents/:id" element={<UserTicketDetails />} />

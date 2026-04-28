@@ -10,6 +10,15 @@ const locations = [
   "Main Building - Lecture Hall A",
   "Library - Study Area",
   "IT Lab - Computer Lab 2"
+  "Main Building - Lab 101",
+  "Main Building - Lab 204",
+  "Computer Lab - A403",
+  "Main Building - Lecture Hall A",
+  "Library - Study Area",
+  "Computer Lab - A501",
+  "Canteen",
+  "Parking Area",
+  "Ground"
 ];
 
 const categories = [
@@ -31,6 +40,7 @@ export default function UserCreateIncident() {
     description: "",
     priority: "",
     contact: ""
+    preferredContact: ""
   });
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
@@ -78,6 +88,58 @@ export default function UserCreateIncident() {
     if (!validate()) return;
     console.log("Form submitted:", { ...formData, files });
     alert("Ticket submitted successfully!");
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    console.log("SUBMIT CLICKED");
+    console.log("Form state:", formData);
+    console.log("Files:", files);
+
+    if (!validate()) {
+      console.log("Validation failed");
+      return;
+    }
+ 
+    const formDataToSend = new FormData();
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("category", formData.category);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("priority", formData.priority);
+    formDataToSend.append("preferredContact", formData.preferredContact);
+
+    if (files && files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        formDataToSend.append("files", files[i]);
+      }
+    }
+
+    try {
+      console.log("Sending API request...");
+      
+      const res = await fetch("http://localhost:8080/api/tickets", {
+        method: "POST",
+        body: formDataToSend
+      });
+
+      console.log("Response status:", res.status);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Response error:", res.status, errorText);
+        alert("Error creating ticket. Please try again.");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("CREATED:", data);
+      
+      alert("Ticket Created Successfully!");
+      window.location.reload();
+
+    } catch (err) {
+      console.error("CATCH ERROR:", err);
+      alert("Error creating ticket: " + err.message);
+    }
   };
 
   return (
@@ -196,6 +258,8 @@ export default function UserCreateIncident() {
                     type="text"
                     name="contact"
                     value={formData.contact}
+                    name="preferredContact"
+                    value={formData.preferredContact}
                     onChange={handleChange}
                     placeholder="Email or phone number"
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all"
