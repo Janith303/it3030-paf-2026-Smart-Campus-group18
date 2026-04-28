@@ -75,10 +75,9 @@ export const UserTopbar = () => {
 
       <div className="flex items-center gap-6">
         <span className="text-sm text-gray-500 hidden md:block">{currentDate}</span>
-
-        {/* Member 4 — Real notification bell replaces the old static button */}
-        <NotificationBell />
-
+        <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+          <Bell size={20} />
+        </button>
         <button className="bg-indigo-600 text-white h-9 w-9 rounded-full flex items-center justify-center shadow-sm">
           <User size={18} />
         </button>
