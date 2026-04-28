@@ -1,6 +1,5 @@
 package com.smartcampus.backend.repository;
 
-
 import com.smartcampus.backend.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-// MUST have @Repository
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -24,14 +22,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
            "AND b.startTime < :endTime " +
            "AND b.endTime > :startTime")
     boolean existsOverlappingBooking(
-            @Param("resourceId") Long resourceId, 
-            @Param("startTime") LocalDateTime startTime, 
+            @Param("resourceId") Long resourceId,
+            @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
-    @Query("SELECT b.status, COUNT(b) FROM Booking b WHERE b.userId = :userId GROUP BY b.status")
-        List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);
-
-    Optional<Booking> findByQrToken(String qrToken);
 
     @Query("SELECT b.status, COUNT(b) FROM Booking b WHERE b.userId = :userId GROUP BY b.status")
     List<Object[]> getBookingStatsByUserId(@Param("userId") Long userId);

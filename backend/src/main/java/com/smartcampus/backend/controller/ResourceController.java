@@ -1,14 +1,5 @@
 package com.smartcampus.backend.controller;
 
-import com.smartcampus.backend.model.Resource;
-import com.smartcampus.backend.repository.ResourceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.smartcampus.backend.dto.ResourceRequestDTO;
 import com.smartcampus.backend.dto.ResourceResponseDTO;
 import com.smartcampus.backend.model.ResourceStatus;
@@ -18,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -26,12 +18,6 @@ import java.util.List;
 public class ResourceController {
 
     @Autowired
-    private ResourceRepository resourceRepository;
-
-    @GetMapping
-    public ResponseEntity<List<Resource>> getAllResources() {
-        // This now queries the actual PostgreSQL 'resources' table!
-        return ResponseEntity.ok(resourceRepository.findAll());
     private ResourceService resourceService;
 
     @PostMapping
@@ -46,7 +32,7 @@ public class ResourceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateResource(
-            @PathVariable Long id, 
+            @PathVariable Long id,
             @RequestBody ResourceRequestDTO request) {
         try {
             ResourceResponseDTO updated = resourceService.updateResource(id, request);
