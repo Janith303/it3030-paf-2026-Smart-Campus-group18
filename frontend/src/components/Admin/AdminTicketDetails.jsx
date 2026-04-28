@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Tag, User, Calendar, Phone, 
-  Clock, MessageSquare, Send, Paperclip
-} from 'lucide-react';
-import { UserSidebar, UserTopbar } from '../Lecture/navbar';
+  Clock, MessageSquare, Send
+} from "lucide-react";
+import { Sidebar, Topbar } from "./navbar";
 
 const getStatusBadge = (status) => {
   const styles = {
-    OPEN: 'bg-blue-100 text-blue-700',
-    IN_PROGRESS: 'bg-yellow-100 text-yellow-700',
-    RESOLVED: 'bg-green-100 text-green-700',
-    REJECTED: 'bg-red-100 text-red-700',
-    CLOSED: 'bg-gray-100 text-gray-700'
+    OPEN: "bg-blue-100 text-blue-700",
+    IN_PROGRESS: "bg-yellow-100 text-yellow-700",
+    RESOLVED: "bg-green-100 text-green-700",
+    REJECTED: "bg-red-100 text-red-700",
+    CLOSED: "bg-gray-100 text-gray-700"
   };
   const labels = {
-    OPEN: 'Open',
-    IN_PROGRESS: 'In Progress',
-    RESOLVED: 'Resolved',
-    REJECTED: 'Rejected',
-    CLOSED: 'Closed'
+    OPEN: "Open",
+    IN_PROGRESS: "In Progress",
+    RESOLVED: "Resolved",
+    REJECTED: "Rejected",
+    CLOSED: "Closed"
   };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
+    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-700"}`}>
       {labels[status] || status}
     </span>
   );
@@ -30,19 +30,19 @@ const getStatusBadge = (status) => {
 
 const getPriorityBadge = (priority) => {
   const styles = {
-    HIGH: 'bg-red-100 text-red-700',
-    MEDIUM: 'bg-blue-100 text-blue-700',
-    LOW: 'bg-green-100 text-green-700'
+    HIGH: "bg-red-100 text-red-700",
+    MEDIUM: "bg-blue-100 text-blue-700",
+    LOW: "bg-green-100 text-green-700"
   };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[priority] || 'bg-gray-100 text-gray-700'}`}>
+    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[priority] || "bg-gray-100 text-gray-700"}`}>
       {priority}
     </span>
   );
 };
 
 const formatDate = (dateString) => {
-  if (!dateString) return '-';
+  if (!dateString) return "-";
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -62,8 +62,9 @@ const getActivityIcon = (type) => {
   }
 };
 
-export default function UserTicketDetails() {
+export default function AdminTicketDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -116,7 +117,7 @@ export default function UserTicketDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: newComment,
-          author: "User"
+          author: "Admin"
         })
       });
       setNewComment("");
@@ -127,12 +128,31 @@ export default function UserTicketDetails() {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this ticket?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/tickets/${id}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+
+      alert("Ticket deleted successfully");
+      navigate("/admin/tickets");
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting ticket");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <UserSidebar />
+        <Sidebar />
         <div className="flex-1 flex flex-col ml-64">
-          <UserTopbar />
+          <Topbar />
           <main className="p-8">
             <div className="text-center text-gray-500">Loading ticket details...</div>
           </main>
@@ -144,9 +164,9 @@ export default function UserTicketDetails() {
   if (!ticket) {
     return (
       <div className="flex min-h-screen bg-gray-50">
-        <UserSidebar />
+        <Sidebar />
         <div className="flex-1 flex flex-col ml-64">
-          <UserTopbar />
+          <Topbar />
           <main className="p-8">
             <div className="text-center text-gray-500">Ticket not found</div>
           </main>
@@ -157,18 +177,18 @@ export default function UserTicketDetails() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <UserSidebar />
+      <Sidebar />
       <div className="flex-1 flex flex-col ml-64">
-        <UserTopbar />
+        <Topbar />
         <main className="p-8">
           <div className="mb-6">
-            <Link 
-              to="/user/incidents" 
+            <button 
+              onClick={() => navigate("/admin/tickets")}
               className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
             >
               <ArrowLeft size={16} />
-              Back to My Incidents
-            </Link>
+              Back to Tickets
+            </button>
           </div>
 
           <div className="mb-6">
@@ -326,6 +346,18 @@ export default function UserTicketDetails() {
                       );
                     })
                   )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-red-100 p-6 shadow-sm">
+                <p className="text-sm text-gray-500 mb-4">Permanently delete this ticket. This action cannot be undone.</p>
+                <div className="mt-6">
+                  <button
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition-colors w-full"
+                >
+                  Delete Ticket
+                </button>
                 </div>
               </div>
             </div>

@@ -14,7 +14,7 @@ export default function AssignedTickets() {
       status: "IN_PROGRESS",
       priority: "HIGH",
       user: "John Smith",
-      location: "Engineering Building - Lab 204",
+      location: "Main Building - Lab 204",
       category: "HVAC",
       date: "2026-04-06"
     },

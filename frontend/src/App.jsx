@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dash from "./components/Admin/dash";
 import AdminTickets from "./components/Admin/tickets";
+import AdminTicketDetails from "./components/Admin/AdminTicketDetails";
 import AssignedTickets from "./components/Technician/AssignedTickets";
 import AdminResources from "./components/Admin/resouces";
 import BookResource from "./components/Lecture/booking";
@@ -23,6 +24,7 @@ function App() {
       <Routes>
         <Route>
           <Route path="/admin/tickets" element={<AdminTickets />} />
+          <Route path="/admin/tickets/:id" element={<AdminTicketDetails />} />
           <Route path="/technician/tickets" element={<AssignedTickets />} />
           <Route path="/" element={<Home />} />
           <Route path="/admin/dashboard" element={<Admindashboard />} />
