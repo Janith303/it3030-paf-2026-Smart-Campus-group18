@@ -35,6 +35,13 @@ public class BookingServiceImpl implements BookingService {
         booking.setExpectedAttendees(request.getExpectedAttendees());
         booking.setStatus(BookingStatus.PENDING);
 
+        booking.setResourceName(request.getResourceName()); 
+        
+        booking.setPurpose(request.getPurpose());
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setStatus(BookingStatus.PENDING);
+
         return bookingRepository.save(booking);
     }
 
