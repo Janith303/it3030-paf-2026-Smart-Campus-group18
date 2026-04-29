@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserSidebar, UserTopbar } from './navbar';
 import { Layers, MapPin, Users, Clock, Search, Calendar } from 'lucide-react';
+import api from '../../api/axiosInstance';
 
 export default function Resources() {
   const [resources, setResources] = useState([]);
@@ -14,11 +15,11 @@ export default function Resources() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/resources')
-      .then(res => res.json())
-      .then(data => {
-        setResources(data);
-        setFilteredResources(data);
+    // Member 4 fix: use axiosInstance so JWT token is attached
+    api.get('/api/resources')
+      .then(res => {
+        setResources(res.data);
+        setFilteredResources(res.data);
       })
       .catch(err => console.error('Error loading resources:', err));
   }, []);

@@ -18,7 +18,6 @@ public class Resource {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private Integer capacity;
 
     @Column(nullable = false)
@@ -32,6 +31,7 @@ public class Resource {
     @Column(nullable = false)
     private ResourceStatus status = ResourceStatus.ACTIVE;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

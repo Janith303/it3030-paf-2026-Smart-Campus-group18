@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import NotificationBell from '../Notification/NotificationBell';
 import { 
   Building2, ClipboardList, 
-  Search, Bell, User
+  Search, User, Bell
 } from 'lucide-react';
+
 
 export const TechnicianSidebar = () => {
   const location = useLocation();
@@ -74,6 +76,10 @@ export const TechnicianTopbar = () => {
         <span className="text-sm text-gray-500 hidden md:block">
           {currentDate}
         </span>
+
+        {/* Member 4 — Real notification bell replaces the old static button */}
+        <NotificationBell />
+
         <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
           <Bell size={20} />
         </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar, Topbar } from './navbar'; 
-import { CheckCircle, XCircle, Filter, Info, MessageSquare, UserCheck, ArrowUpDown, Calendar, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Filter, MessageSquare, UserCheck, ArrowUpDown, Calendar, Clock } from 'lucide-react';
+import api from '../../api/axiosInstance';
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState([]);
@@ -16,9 +17,9 @@ export default function AdminBookings() {
   }, []);
 
   const fetchBookings = () => {
-    fetch('http://localhost:8080/api/bookings')
-      .then(res => res.json())
-      .then(data => setBookings(data))
+    // Member 4 fix: use axiosInstance so JWT token is attached
+    api.get('/api/bookings')
+      .then(res => setBookings(res.data))
       .catch(err => console.error("Error:", err));
   };
 
@@ -29,37 +30,26 @@ export default function AdminBookings() {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/bookings/${selectedBooking.id}/status?status=${actionType}&reason=${adminReason}`,
-        { method: 'PATCH' }
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.patch(
+        `/api/bookings/${selectedBooking.id}/status?status=${actionType}&reason=${adminReason}`
       );
-
-      if (response.ok) {
-        setSelectedBooking(null);
-        setAdminReason('');
-        fetchBookings(); 
-      }
+      setSelectedBooking(null);
+      setAdminReason('');
+      fetchBookings(); 
     } catch (error) {
       alert("Failed to update status.");
     }
   };
 
-  // UPGRADED: Bulletproof Date Sorting Logic
   const processedBookings = bookings
     .filter(b => filter === 'ALL' || b.status === filter)
     .sort((a, b) => {
-      // Safety check: If a date is missing entirely, push it to the bottom
       if (!a.startTime) return 1;
       if (!b.startTime) return -1;
-
-      // Convert to reliable JavaScript timestamps
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
-
-      // Safety check: If a date is "Invalid Date", ignore the sort for that row
       if (isNaN(dateA) || isNaN(dateB)) return 0;
-
-      // Do the math based on selection
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
@@ -72,17 +62,14 @@ export default function AdminBookings() {
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             
-            {/* Header & Controls Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Manage Bookings</h2>
                 <p className="text-gray-500">Review and respond to resource requests.</p>
               </div>
 
-              {/* Controls */}
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 
-                {/* Status Filter */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <Filter size={18} className="text-gray-400" />
                   <select 
@@ -98,7 +85,6 @@ export default function AdminBookings() {
                   </select>
                 </div>
 
-                {/* UPGRADED: Date Sort Dropdown with clear labels */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <ArrowUpDown size={18} className="text-gray-400" />
                   <select 
@@ -179,7 +165,7 @@ export default function AdminBookings() {
                             </div>
                           ) : (
                             <span className="whitespace-nowrap text-xs font-medium text-amber-600 border border-amber-200 bg-amber-50 px-2 py-1 rounded-md">
-                            Awaiting Arrival
+                              Awaiting Arrival
                             </span>
                           )
                         ) : (
@@ -220,7 +206,7 @@ export default function AdminBookings() {
         </main>
       </div>
 
-      {/* --- Action Modal --- */}
+      {/* Action Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">

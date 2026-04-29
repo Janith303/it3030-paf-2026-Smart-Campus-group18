@@ -29,4 +29,5 @@
 *.bak
 
 # Ignore local secret configurations
+backend/src/main/resources/application-local.properties
 application-local.properties

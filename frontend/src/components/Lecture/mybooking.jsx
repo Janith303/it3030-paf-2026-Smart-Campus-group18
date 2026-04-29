@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserSidebar, UserTopbar } from './navbar';
+import api from '../../api/axiosInstance';
 import { 
   Calendar, 
   Clock, 
@@ -25,18 +26,17 @@ export default function MyBookings() {
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
   const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
 
-  const fetchBookings = () => {
+  const fetchBookings = async () => {
     setLoading(true);
-    fetch('http://localhost:8080/api/bookings/user/1') 
-      .then(res => res.json())
-      .then(data => {
-        setBookings(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching bookings:", err);
-        setLoading(false);
-      });
+    try {
+      // Using teammate's Axios instance
+      const res = await api.get('/api/bookings/user/1');
+      setBookings(res.data);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -46,11 +46,9 @@ export default function MyBookings() {
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}/cancel?reason=Cancelled by user`, { method: 'PATCH' });
-      if (response.ok) {
-        alert("Booking cancelled successfully.");
-        fetchBookings(); 
-      }
+      await api.patch(`/api/bookings/${id}/cancel?reason=Cancelled by user`);
+      alert("Booking cancelled successfully.");
+      fetchBookings(); 
     } catch (error) {
       alert("Failed to cancel booking.");
     }
@@ -59,13 +57,9 @@ export default function MyBookings() {
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this record? This cannot be undone.")) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        alert("Record deleted from history.");
-        fetchBookings(); 
-      } else {
-        alert("Failed to delete the record.");
-      }
+      await api.delete(`/api/bookings/${id}`);
+      alert("Record deleted from history.");
+      fetchBookings(); 
     } catch (error) {
       console.error("Error deleting:", error);
       alert("Server error.");
@@ -82,31 +76,25 @@ export default function MyBookings() {
     }
   };
 
-  // UPGRADED: Bulletproof Date Sorting Logic
+  // Bulletproof Date Sorting Logic
   const processedBookings = bookings
     .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
     .sort((a, b) => {
-      // Safety check: If a date is missing entirely, push it to the bottom
       if (!a.startTime) return 1;
       if (!b.startTime) return -1;
 
-      // Convert to reliable JavaScript timestamps
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
 
-      // Safety check: If a date is "Invalid Date", ignore the sort for that row
       if (isNaN(dateA) || isNaN(dateB)) return 0;
 
-      // Do the math based on selection
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
   return (
-    // FIXED: min-h-screen and overflow-x-hidden for layout stability
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <UserSidebar />
       
-      {/* FIXED: min-w-0 to prevent flexbox blowout */}
       <div className="flex-1 flex flex-col ml-64 min-w-0">
         <UserTopbar />
         
@@ -155,9 +143,7 @@ export default function MyBookings() {
               </div>
             </div>
 
-            {/* --- UPGRADED UX SECTION --- */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full">
-              {/* Added Ghost Scroll styling and whitespace-nowrap */}
               <div className="overflow-x-auto w-full pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                   <thead className="bg-gray-50 border-b border-gray-100">
@@ -244,7 +230,7 @@ export default function MyBookings() {
                               title="Delete Permanently"
                             >
                               <Trash2 size={20} />
-                          </button>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -253,7 +239,6 @@ export default function MyBookings() {
                 </table>
               </div>
 
-              {/* Handled empty state */}
               {processedBookings.length === 0 && !loading && (
                 <div className="p-12 text-center">
                   <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -272,7 +257,7 @@ export default function MyBookings() {
         </main>
       </div>
 
-      {/* --- Admin Message Modal --- */}
+      {/* Admin Message Modal */}
       {messageModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -295,7 +280,7 @@ export default function MyBookings() {
         </div>
       )}
 
-      {/* --- Entry Pass Modal --- */}
+      {/* Entry Pass Modal */}
       {qrModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
