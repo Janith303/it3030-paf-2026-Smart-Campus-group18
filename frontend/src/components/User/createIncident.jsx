@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import { UserSidebar, UserTopbar } from '../Lecture/navbar';
+import api from '../../api/axiosInstance';
 
 const locations = [
   "Main Building - Lab 101",
@@ -76,17 +77,10 @@ export default function UserCreateIncident() {
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log("SUBMIT CLICKED");
-    console.log("Form state:", formData);
-    console.log("Files:", files);
 
-    if (!validate()) {
-      console.log("Validation failed");
-      return;
-    }
+    if (!validate()) return;
  
     const formDataToSend = new FormData();
     formDataToSend.append("location", formData.location);
@@ -102,24 +96,10 @@ const handleSubmit = async (e) => {
     }
 
     try {
-      console.log("Sending API request...");
-      
-      const res = await fetch("http://localhost:8080/api/tickets", {
-        method: "POST",
-        body: formDataToSend
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.post("/api/tickets", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" }
       });
-
-      console.log("Response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Response error:", res.status, errorText);
-        alert("Error creating ticket. Please try again.");
-        return;
-      }
-
-      const data = await res.json();
-      console.log("CREATED:", data);
       
       alert("Ticket Created Successfully!");
       window.location.reload();
