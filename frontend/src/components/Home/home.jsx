@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, AlertCircle, BarChart3, ShieldCheck, 
   Building2, Users, Clock, CheckCircle2, ArrowRight,
@@ -6,10 +7,12 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-white">
       
-      {/* --- NAVIGATION --- */}
+   {/* --- NAVIGATION --- */}
       <nav className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="bg-indigo-600 p-2 rounded-lg">
@@ -18,9 +21,10 @@ export default function LandingPage() {
           <span className="text-xl font-bold">Smart Campus</span>
         </div>
         <div className="flex items-center gap-6">
-          <button className="text-sm font-medium hover:text-indigo-600 transition-colors">Sign in</button>
-          <button className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2">
-            Get Started <ArrowRight size={16} />
+          <button 
+            onClick={() => navigate('/login')}
+            className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+            Sign in
           </button>
         </div>
       </nav>
