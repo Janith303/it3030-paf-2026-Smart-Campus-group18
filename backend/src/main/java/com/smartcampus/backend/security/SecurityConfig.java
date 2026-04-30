@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,10 +20,14 @@ public class SecurityConfig {
 
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtAuthFilter jwtAuthFilter;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
-    public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler, JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(OAuth2SuccessHandler oAuth2SuccessHandler,
+                          JwtAuthFilter jwtAuthFilter,
+                          ClientRegistrationRepository clientRegistrationRepository) {
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
         this.jwtAuthFilter = jwtAuthFilter;
+        this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
     @Bean
@@ -38,15 +43,22 @@ public class SecurityConfig {
                     "/oauth2/**",
                     "/api/public/**",
                     "/error",
-                    "/api/**"  // <-- FIX 1: Temporarily opens all API routes so you can test your UI!
+                    "/api/**"
                 ).permitAll()
-                // <-- FIX 2: Temporarily commented out Admin check so you don't get 403 Forbidden errors
-                // .requestMatchers("/api/admin/**").hasRole("ADMIN") 
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
                 .successHandler(oAuth2SuccessHandler)
+                // Member 4 — Forces Google account picker on every login
+                .authorizationEndpoint(authorization -> authorization
+                    .authorizationRequestResolver(
+                        new CustomAuthorizationRequestResolver(
+                            clientRegistrationRepository,
+                            "/oauth2/authorization"
+                        )
+                    )
+                )
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -56,9 +68,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        
-        // <-- FIX 3: Added port 3000 to the safe list alongside 5173
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000")); 
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
