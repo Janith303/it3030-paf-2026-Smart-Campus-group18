@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar, Topbar } from '../components/Admin/navbar';
-import api from '../api/axiosInstance';
+import { Sidebar, Topbar } from '../Admin/navbar';
+import api from '../../api/axiosInstance';
 import { Users, Shield, User, Wrench, Search } from 'lucide-react';
 
 export default function RoleManagement() {

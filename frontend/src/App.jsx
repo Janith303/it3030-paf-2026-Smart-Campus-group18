@@ -17,10 +17,10 @@ import Admindashboard from "./components/Admin/dash";
 import UserResources from "./components/Lecture/Resources";
 
 // Member 4 imports
-import Login from "./pages/Login";
-import OAuthCallback from "./pages/OAuthCallback";
-import RoleManagement from "./pages/RoleManagement";
-import NotificationsPage from "./pages/Notifications";
+import Login from "./components/pages/Login";
+import OAuthCallback from "./components/pages/OAuthCallback";
+import RoleManagement from "./components/pages/RoleManagement";
+import NotificationsPage from "./components/pages/Notifications";
 
 import { UserSidebar, UserTopbar } from "./components/Lecture/navbar";
 import { Sidebar, Topbar } from "./components/Admin/navbar";

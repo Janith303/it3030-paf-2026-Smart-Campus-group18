@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/axiosInstance';
+import api from '../../api/axiosInstance';
 import { Bell, BookOpen, Wrench, MessageSquare, CheckCheck, Trash2 } from 'lucide-react';
 
 export default function NotificationsPage({ SidebarComponent, TopbarComponent }) {
