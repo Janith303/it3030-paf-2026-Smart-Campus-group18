@@ -12,13 +12,14 @@ export const Sidebar = () => {
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+    { name: 'Role Management', icon: Users, path: '/admin/role-management' },
     { name: 'Tickets', icon: Ticket, path: '/admin/tickets' },
     { name: 'Resources', icon: Layers, path: '/resources' },
     { name: 'Bookings', icon: Calendar, path: '/admin/bookings' },
     { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
     { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'Profile', icon: User, path: '/profile' },
-    { name: 'Role Management', icon: Users, path: '/admin/role-management' },
+    
   ];
 
   const handleLogout = () => {

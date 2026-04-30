@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar, Topbar } from '../components/Admin/navbar';
 import api from '../api/axiosInstance';
-import { Users, Shield, User, Wrench } from 'lucide-react';
+import { Users, Shield, User, Wrench, Search } from 'lucide-react';
 
 export default function RoleManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -38,6 +39,11 @@ export default function RoleManagement() {
       setUpdating(null);
     }
   };
+
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().includes(search.toLowerCase()) ||
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const getRoleBadge = (role) => {
     const styles = {
@@ -77,13 +83,31 @@ export default function RoleManagement() {
             )}
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-                <div className="bg-indigo-50 p-2 rounded-lg">
-                  <Users size={20} className="text-indigo-600" />
+
+              {/* Header */}
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-indigo-50 p-2 rounded-lg">
+                    <Users size={20} className="text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">All Users</h3>
+                    <p className="text-sm text-gray-500">{filteredUsers.length} of {users.length} users</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">All Users</h3>
-                  <p className="text-sm text-gray-500">{users.length} registered users</p>
+              </div>
+
+              {/* Search Bar */}
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="relative">
+                  <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  />
                 </div>
               </div>
 
@@ -101,43 +125,51 @@ export default function RoleManagement() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            {user.pictureUrl ? (
-                              <img 
-                                src={user.pictureUrl} 
-                                alt={user.name}
-                                className="w-9 h-9 rounded-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <User size={18} className="text-indigo-600" />
-                              </div>
-                            )}
-                            <span className="font-medium text-gray-900">{user.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                        <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <select
-                            value={user.role}
-                            onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                            disabled={updating === user.id}
-                            className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer"
-                          >
-                            <option value="USER">USER</option>
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="TECHNICIAN">TECHNICIAN</option>
-                          </select>
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                          No users found matching your search.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredUsers.map((user) => (
+                        <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              {user.pictureUrl ? (
+                                <img 
+                                  src={user.pictureUrl} 
+                                  alt={user.name}
+                                  className="w-9 h-9 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center">
+                                  <User size={18} className="text-indigo-600" />
+                                </div>
+                              )}
+                              <span className="font-medium text-gray-900">{user.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                          <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <select
+                              value={user.role}
+                              onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                              disabled={updating === user.id}
+                              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer"
+                            >
+                              <option value="USER">USER</option>
+                              <option value="ADMIN">ADMIN</option>
+                              <option value="TECHNICIAN">TECHNICIAN</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               )}
