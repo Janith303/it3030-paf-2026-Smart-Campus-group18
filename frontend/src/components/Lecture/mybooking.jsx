@@ -29,8 +29,17 @@ export default function MyBookings() {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // Using teammate's Axios instance
-      const res = await api.get('/api/bookings/user/1');
+      // 1. Grab the real user ID saved during Google Login
+      const currentUserId = localStorage.getItem('userId');
+      
+      if (!currentUserId) {
+        console.warn("No user ID found. User might not be fully logged in.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Inject it into the URL to only fetch this specific user's data
+      const res = await api.get(`/api/bookings/user/${currentUserId}`);
       setBookings(res.data);
     } catch (err) {
       console.error("Error fetching bookings:", err);
