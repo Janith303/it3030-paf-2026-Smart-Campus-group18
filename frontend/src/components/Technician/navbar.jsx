@@ -3,9 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../Notification/NotificationBell';
 import { 
   Building2, ClipboardList, 
-  Search, User, Bell
+  Search, User, LogOut
 } from 'lucide-react';
-
 
 export const TechnicianSidebar = () => {
   const location = useLocation();
@@ -14,8 +13,13 @@ export const TechnicianSidebar = () => {
     { name: 'Assigned Tickets', icon: ClipboardList, path: '/technician/tickets' },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col">
+    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col overflow-hidden">
       <div className="p-6 flex items-center gap-3">
         <div className="bg-indigo-600 p-2 rounded-xl text-white flex-shrink-0">
           <Building2 size={24} />
@@ -26,7 +30,7 @@ export const TechnicianSidebar = () => {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 mt-5 space-y-1 overflow-y-auto pb-8">
+      <nav className="flex-1 px-4 mt-5 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
 
@@ -46,6 +50,17 @@ export const TechnicianSidebar = () => {
           );
         })}
       </nav>
+
+      {/* Logout Button */}
+      <div className="px-4 pb-6 border-t border-gray-100 pt-4">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium"
+        >
+          <LogOut size={20} />
+          Log Out
+        </button>
+      </div>
     </div>
   );
 };
@@ -77,12 +92,8 @@ export const TechnicianTopbar = () => {
           {currentDate}
         </span>
 
-        {/* Member 4 — Real notification bell replaces the old static button */}
         <NotificationBell />
 
-        <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
-          <Bell size={20} />
-        </button>
         <button className="bg-indigo-600 text-white h-9 w-9 rounded-full flex items-center justify-center shadow-sm">
           <User size={18} />
         </button>

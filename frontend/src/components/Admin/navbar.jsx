@@ -4,9 +4,8 @@ import NotificationBell from '../Notification/NotificationBell';
 import { 
   Ticket,
   Building2, LayoutDashboard, Layers, 
-  AlertCircle, Search, User,Bell, Calendar, ScanLine
+  AlertCircle, Search, User, Calendar, ScanLine, LogOut
 } from 'lucide-react';
-
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -19,8 +18,12 @@ export const Sidebar = () => {
     { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
     { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'Profile', icon: User, path: '/profile' },
-    { name: 'Notifications', icon: Bell, path: '/notifications' },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
 
   return (
     <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 overflow-hidden">
@@ -54,6 +57,17 @@ export const Sidebar = () => {
           );
         })}
       </nav>
+
+      {/* Logout Button */}
+      <div className="px-4 pb-6 border-t border-gray-100 pt-4">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium"
+        >
+          <LogOut size={20} />
+          Log Out
+        </button>
+      </div>
     </div>
   );
 };
@@ -85,15 +99,8 @@ export const Topbar = () => {
           {currentDate}
         </span>
 
-        {/* Member 4 — Real notification bell replaces the old static button */}
         <NotificationBell />
 
-        <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
-          <Bell size={20} />
-          <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
-            3
-          </span>
-        </button>
         <button className="bg-indigo-600 text-white h-9 w-9 rounded-full flex items-center justify-center shadow-sm">
           <User size={18} />
         </button>
