@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosInstance';
-import { Bell, BookOpen, Wrench, MessageSquare } from 'lucide-react';
+import { Bell, BookOpen, Wrench, MessageSquare, CheckCheck, Trash2 } from 'lucide-react';
 
 export default function NotificationsPage({ SidebarComponent, TopbarComponent }) {
   const [notifications, setNotifications] = useState([]);
@@ -15,11 +15,29 @@ export default function NotificationsPage({ SidebarComponent, TopbarComponent })
     try {
       const res = await api.get('/api/notifications');
       setNotifications(res.data);
-      await api.put('/api/notifications/mark-all-read');
     } catch (err) {
       console.error("Error fetching notifications:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.put('/api/notifications/mark-all-read');
+      fetchNotifications();
+    } catch (err) {
+      console.error("Error marking all as read:", err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm("Are you sure you want to clear all notifications?")) return;
+    try {
+      await api.delete('/api/notifications/clear-all');
+      setNotifications([]);
+    } catch (err) {
+      console.error("Error clearing notifications:", err);
     }
   };
 
@@ -88,6 +106,26 @@ export default function NotificationsPage({ SidebarComponent, TopbarComponent })
                     <p className="text-sm text-gray-500">{notifications.length} total</p>
                   </div>
                 </div>
+
+                {/* Action Buttons */}
+                {notifications.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleMarkAllRead}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
+                    >
+                      <CheckCheck size={16} />
+                      Mark all as read
+                    </button>
+                    <button
+                      onClick={handleClearAll}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                    >
+                      <Trash2 size={16} />
+                      Clear all
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Notifications List */}

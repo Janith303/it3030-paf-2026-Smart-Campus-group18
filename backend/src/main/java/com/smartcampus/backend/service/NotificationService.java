@@ -49,4 +49,11 @@ public class NotificationService {
             notificationRepository.save(n);
         });
     }
+
+    // Clears all notifications for a user
+    public void clearAll(Long userId) {
+        List<Notification> notifications =
+            notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        notificationRepository.deleteAll(notifications);
+    }
 }

@@ -53,4 +53,12 @@ public class NotificationController {
         notificationService.markOneAsRead(id);
         return ResponseEntity.noContent().build();
     }
+
+    // DELETE /api/notifications/clear-all
+    @DeleteMapping("/clear-all")
+    public ResponseEntity<Void> clearAll(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+        notificationService.clearAll(user.getId());
+        return ResponseEntity.noContent().build();
+    }
 }
