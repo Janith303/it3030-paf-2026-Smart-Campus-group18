@@ -5,21 +5,28 @@ import {
   AlertCircle, ArrowRight, PlusCircle 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../../api/axiosInstance';
 
 export default function UserDashboard() {
   const [stats, setStats] = useState({ TOTAL: 0, PENDING: 0, APPROVED: 0, REJECTED: 0 });
   const [upcoming, setUpcoming] = useState([]);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Fetch logged in user
+    api.get('/api/users/me')
+      .then(res => setUser(res.data))
+      .catch(err => console.error("Error fetching user:", err));
+
     // Fetch Stats
-    fetch('http://localhost:8080/api/bookings/user/1/stats')
-      .then(res => res.json())
-      .then(data => setStats(data));
+    api.get('/api/bookings/user/1/stats')
+      .then(res => setStats(res.data))
+      .catch(err => console.error("Error fetching stats:", err));
 
     // Fetch Bookings (just to show the latest 3)
-    fetch('http://localhost:8080/api/bookings/user/1')
-      .then(res => res.json())
-      .then(data => setUpcoming(data.slice(0, 3)));
+    api.get('/api/bookings/user/1')
+      .then(res => setUpcoming(res.data.slice(0, 3)))
+      .catch(err => console.error("Error fetching bookings:", err));
   }, []);
 
   const statCards = [
@@ -38,7 +45,9 @@ export default function UserDashboard() {
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome Back, Janith!</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Welcome Back, {user ? user.name.split(' ')[0] : ''}!
+              </h2>
               <p className="text-gray-500">Here's what's happening with your resource bookings.</p>
             </div>
 
