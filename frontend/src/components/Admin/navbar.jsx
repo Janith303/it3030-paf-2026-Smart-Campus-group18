@@ -4,7 +4,7 @@ import NotificationBell from '../Notification/NotificationBell';
 import { 
   Ticket,
   Building2, LayoutDashboard, Layers, 
-  AlertCircle, Search, User, Calendar, ScanLine, LogOut
+  AlertCircle, Search, User, Calendar, ScanLine, LogOut, Users
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -18,6 +18,7 @@ export const Sidebar = () => {
     { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
     { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'Profile', icon: User, path: '/profile' },
+    { name: 'Role Management', icon: Users, path: '/admin/role-management' },
   ];
 
   const handleLogout = () => {

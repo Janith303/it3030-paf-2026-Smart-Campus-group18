@@ -20,6 +20,7 @@ import Admindashboard from "./components/Admin/dash";
 import Login from "./pages/Login";
 import OAuthCallback from "./pages/OAuthCallback";
 import UserResources from "./components/Lecture/Resources";
+import RoleManagement from "./pages/RoleManagement";
 
 
 
@@ -54,6 +55,7 @@ function App() {
           {/* Member 4 - Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth2/callback" element={<OAuthCallback />} />
+          <Route path="/admin/role-management" element={<RoleManagement />} />
         </Route>
       </Routes>
     </BrowserRouter>
