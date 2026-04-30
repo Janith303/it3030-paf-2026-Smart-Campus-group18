@@ -6,14 +6,23 @@ export default function OAuthCallback() {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
 
-      console.log("Token received:", token); // for debugging
-
       if (token && token.length > 0) {
         localStorage.setItem("token", token);
-        console.log("Token saved, redirecting...");
-        window.location.replace("/user");
+
+        // Decode JWT to get the role
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const role = payload.role;
+
+        // Redirect based on role
+        if (role === 'ADMIN') {
+          window.location.replace("/admin/dashboard");
+        } else if (role === 'TECHNICIAN') {
+          window.location.replace("/technician/tickets");
+        } else {
+          window.location.replace("/user");
+        }
+
       } else {
-        console.log("No token found, redirecting to login...");
         window.location.replace("/login");
       }
     } catch (err) {
