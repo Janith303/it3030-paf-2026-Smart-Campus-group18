@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import NotificationBell from '../Notification/NotificationBell';
 import { 
   Building2, ClipboardList, 
-  Search, User, LogOut
+  Search, User, LogOut, Bell
 } from 'lucide-react';
 
 export const TechnicianSidebar = () => {
@@ -11,6 +11,7 @@ export const TechnicianSidebar = () => {
 
   const navItems = [
     { name: 'Assigned Tickets', icon: ClipboardList, path: '/technician/tickets' },
+    { name: 'Notifications', icon: Bell, path: '/technician/notifications' },
   ];
 
   const handleLogout = () => {

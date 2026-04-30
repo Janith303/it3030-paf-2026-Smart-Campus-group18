@@ -11,6 +11,7 @@ export const UserSidebar = () => {
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/user' },
+    { name: 'Notifications', icon: Bell, path: '/user/notifications' },
     { name: 'My Bookings', icon: Calendar, path: '/user/bookings' },
     { name: 'Resources', icon: Layers, path: '/user/resources' },
     { name: 'My Incidents', icon: AlertCircle, path: '/user/incidents' },
