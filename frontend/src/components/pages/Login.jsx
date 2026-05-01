@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { Building2, Calendar, AlertCircle, BarChart3, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:8080/oauth2/authorization/google?prompt=select_account";
   };
@@ -8,7 +11,7 @@ export default function Login() {
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "system-ui, sans-serif" }}>
       
-      {/* Left Half — Indigo gradient with features */}
+      {/* Left Half */}
       <div style={{
         flex: 1,
         background: "linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%)",
@@ -21,7 +24,6 @@ export default function Login() {
         overflow: "hidden"
       }}>
 
-        {/* Background decoration circles */}
         <div style={{
           position: "absolute", top: "-80px", right: "-80px",
           width: "300px", height: "300px", borderRadius: "50%",
@@ -33,8 +35,14 @@ export default function Login() {
           background: "rgba(255,255,255,0.05)"
         }} />
 
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "48px" }}>
+        {/* Clickable Logo */}
+        <div
+          onClick={() => navigate('/')}
+          style={{
+            display: "flex", alignItems: "center", gap: "12px",
+            marginBottom: "48px", cursor: "pointer"
+          }}
+        >
           <div style={{
             background: "rgba(255,255,255,0.2)", padding: "10px",
             borderRadius: "12px", display: "flex"
@@ -44,7 +52,6 @@ export default function Login() {
           <span style={{ fontSize: "22px", fontWeight: "700" }}>Smart Campus</span>
         </div>
 
-        {/* Heading */}
         <h1 style={{
           fontSize: "40px", fontWeight: "800",
           lineHeight: "1.2", marginBottom: "16px"
@@ -60,7 +67,6 @@ export default function Login() {
           A comprehensive platform for managing university facilities, resource bookings, and maintenance tickets.
         </p>
 
-        {/* Feature list */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {[
             { icon: <Calendar size={18} />, text: "Smart resource booking & scheduling" },
@@ -82,7 +88,6 @@ export default function Login() {
           ))}
         </div>
 
-        {/* Stats */}
         <div style={{
           display: "flex", gap: "32px", marginTop: "48px",
           paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.2)"
@@ -100,7 +105,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Half — Login form */}
+      {/* Right Half */}
       <div style={{
         flex: 1, background: "#f8fafc",
         display: "flex", flexDirection: "column",
@@ -114,14 +119,17 @@ export default function Login() {
           border: "1px solid #e2e8f0"
         }}>
 
-          {/* Header */}
+          {/* Clickable icon on right side too */}
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <div style={{
-              background: "#eef2ff", width: "56px", height: "56px",
-              borderRadius: "16px", display: "flex",
-              alignItems: "center", justifyContent: "center",
-              margin: "0 auto 16px"
-            }}>
+            <div
+              onClick={() => navigate('/')}
+              style={{
+                background: "#eef2ff", width: "56px", height: "56px",
+                borderRadius: "16px", display: "flex",
+                alignItems: "center", justifyContent: "center",
+                margin: "0 auto 16px", cursor: "pointer"
+              }}
+            >
               <Building2 size={28} color="#6366f1" />
             </div>
             <h2 style={{
@@ -135,7 +143,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Google Sign In Button */}
           <button
             onClick={handleGoogleLogin}
             style={{
@@ -164,7 +171,6 @@ export default function Login() {
             Continue with Google
           </button>
 
-          {/* Divider */}
           <div style={{
             display: "flex", alignItems: "center",
             gap: "12px", marginBottom: "24px"
@@ -176,19 +182,17 @@ export default function Login() {
             <div style={{ flex: 1, height: "1px", background: "#e2e8f0" }} />
           </div>
 
-          {/* Info text */}
           <div style={{
             background: "#f8fafc", borderRadius: "12px",
             padding: "16px", textAlign: "center"
           }}>
             <p style={{ fontSize: "13px", color: "#64748b", lineHeight: "1.6" }}>
-              By signing in, you agree to our terms of service. 
+              By signing in, you agree to our terms of service.
               Your role will be assigned by your administrator.
             </p>
           </div>
         </div>
 
-        {/* Footer */}
         <p style={{ marginTop: "24px", fontSize: "12px", color: "#94a3b8" }}>
           © 2026 Smart Campus Operations Hub. All rights reserved.
         </p>
