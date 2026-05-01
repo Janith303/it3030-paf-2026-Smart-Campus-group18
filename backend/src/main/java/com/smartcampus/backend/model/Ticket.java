@@ -30,6 +30,10 @@ public class Ticket {
     @JoinColumn(name = "technician_id")
     private User technician;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
     private LocalDateTime createdAt;
 
     @Column(length = 2000)
@@ -134,4 +138,12 @@ public class Ticket {
     public String getTechnicianName() {
         return technician != null ? technician.getName() : assignedTo;
     }
+
+    public User getCreatedBy() {
+    return createdBy;
+}
+public void setCreatedBy(User createdBy) {
+    this.createdBy = createdBy;
+}
+
 }

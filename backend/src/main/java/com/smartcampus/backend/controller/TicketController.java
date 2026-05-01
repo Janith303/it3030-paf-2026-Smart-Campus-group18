@@ -13,6 +13,7 @@ import com.smartcampus.backend.service.TicketService;
 import com.smartcampus.backend.service.CommentService;
 import com.smartcampus.backend.service.ActivityService;
 import com.smartcampus.backend.model.Ticket;
+import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.model.Comment;
 import com.smartcampus.backend.model.Activity;
 import com.smartcampus.backend.model.User;
@@ -44,26 +45,35 @@ public class TicketController {
             @RequestParam String description,
             @RequestParam String priority,
             @RequestParam(required = false) String preferredContact,
-            @RequestParam(required = false) List<MultipartFile> files
+            @RequestParam(required = false) List<MultipartFile> files,
+            Principal principal
     ) {
-        System.out.println("=== CONTROLLER HIT: Creating ticket ===");
-        System.out.println("Location: " + location);
-        System.out.println("Category: " + category);
-        System.out.println("Description: " + description);
-        
         Ticket created = ticketService.createTicketWithFiles(
                 location, category, description, priority, preferredContact, files
         );
-        
-        System.out.println("=== CONTROLLER DONE: Ticket created: " + created.getTicketCode() + " ===");
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(created);
+
+        // Member 4 — save the logged in user as the creator
+        if (principal != null) {
+            userRepository.findByEmail(principal.getName()).ifPresent(user -> {
+                created.setCreatedBy(user);
+                ticketService.saveTicket(created);
+            });
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    // GET /api/tickets — admin sees all tickets
     @GetMapping
     public ResponseEntity<List<Ticket>> getAll() {
         return ResponseEntity.ok(ticketService.getAllTickets());
+    }
+
+    // GET /api/tickets/my — user sees only their own tickets
+    @GetMapping("/my")
+    public ResponseEntity<List<Ticket>> getMyTickets(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+        return ResponseEntity.ok(ticketService.getTicketsByUser(user));
     }
 
     @GetMapping("/{id}")

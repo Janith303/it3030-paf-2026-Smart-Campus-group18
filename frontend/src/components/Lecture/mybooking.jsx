@@ -2,44 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { UserSidebar, UserTopbar } from './navbar';
 import api from '../../api/axiosInstance';
 import { 
-  Calendar, 
-  Clock, 
-  XCircle, 
-  CheckCircle2, 
-  AlertCircle, 
-  Info, 
-  Trash2,
-  MessageSquare,
-  QrCode,
-  Filter,          
-  ArrowUpDown      
+  Calendar, Clock, XCircle, CheckCircle2, 
+  AlertCircle, Info, Trash2, MessageSquare,
+  QrCode, Filter, ArrowUpDown      
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [currentUser, setCurrentUser] = useState(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('NEWEST'); 
-  
   const [messageModal, setMessageModal] = useState({ isOpen: false, text: '', status: '' });
   const [qrModal, setQrModal] = useState({ isOpen: false, token: '', resourceId: '', resourceName: '' }); 
+
+  useEffect(() => {
+    // Fetch logged in user first
+    api.get('/api/users/me')
+      .then(res => setCurrentUser(res.data))
+      .catch(err => console.error("Error fetching user:", err));
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    fetchBookings();
+  }, [currentUser]);
 
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      // 1. Grab the real user ID saved during Google Login
-      const currentUserId = localStorage.getItem('userId');
-      
-      if (!currentUserId) {
-        console.warn("No user ID found. User might not be fully logged in.");
-        setLoading(false);
-        return;
-      }
-
-      // 2. Inject it into the URL to only fetch this specific user's data
-      const res = await api.get(`/api/bookings/user/${currentUserId}`);
+      // Member 4 fix: use real user ID
+      const res = await api.get(`/api/bookings/user/${currentUser.id}`);
       setBookings(res.data);
     } catch (err) {
       console.error("Error fetching bookings:", err);
@@ -47,10 +41,6 @@ export default function MyBookings() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchBookings();
-  }, []);
 
   const handleCancel = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
@@ -85,18 +75,14 @@ export default function MyBookings() {
     }
   };
 
-  // Bulletproof Date Sorting Logic
   const processedBookings = bookings
     .filter(booking => filterStatus === 'ALL' || booking.status === filterStatus)
     .sort((a, b) => {
       if (!a.startTime) return 1;
       if (!b.startTime) return -1;
-
       const dateA = new Date(a.startTime).getTime();
       const dateB = new Date(b.startTime).getTime();
-
       if (isNaN(dateA) || isNaN(dateB)) return 0;
-
       return sortOrder === 'NEWEST' ? dateB - dateA : dateA - dateB;
     });
 
@@ -110,17 +96,13 @@ export default function MyBookings() {
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             
-            {/* Header Area with Filter and Sort Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">My Bookings</h2>
                 <p className="text-gray-500">Track and manage your resource reservations.</p>
               </div>
 
-              {/* Controls */}
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                
-                {/* Filter Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <Filter size={16} className="text-gray-400" />
                   <select 
@@ -136,7 +118,6 @@ export default function MyBookings() {
                   </select>
                 </div>
 
-                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm flex-1 md:flex-none">
                   <ArrowUpDown size={16} className="text-gray-400" />
                   <select 
@@ -148,7 +129,6 @@ export default function MyBookings() {
                     <option value="NEWEST">Latest First (Furthest Away)</option>
                   </select>
                 </div>
-
               </div>
             </div>
 
@@ -167,7 +147,6 @@ export default function MyBookings() {
                   <tbody className="divide-y divide-gray-50">
                     {processedBookings.map((booking) => (
                       <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
-                        
                         <td className="px-6 py-4">
                           <div className="font-bold text-gray-900">
                             {booking.resourceName || "Resource Name Pending"}
@@ -176,7 +155,6 @@ export default function MyBookings() {
                             ID: #{booking.resourceId}
                           </div>
                         </td>
-
                         <td className="px-6 py-4">
                           <div className="flex flex-col text-sm">
                             <span className="flex items-center gap-1.5 text-gray-700">
@@ -197,7 +175,6 @@ export default function MyBookings() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex justify-end gap-2">
-                            
                             {booking.status === 'APPROVED' && booking.qrToken && (
                               <button 
                                 onClick={() => setQrModal({ 
@@ -212,7 +189,6 @@ export default function MyBookings() {
                                 <QrCode size={20} />
                               </button>
                             )}
-
                             {booking.adminReason && (
                               <button 
                                 onClick={() => setMessageModal({ isOpen: true, text: booking.adminReason, status: booking.status })}
@@ -222,7 +198,6 @@ export default function MyBookings() {
                                 <MessageSquare size={20} />
                               </button>
                             )}
-
                             {(booking.status === 'PENDING' || booking.status === 'APPROVED') && (
                               <button 
                                 onClick={() => handleCancel(booking.id)}
@@ -232,7 +207,6 @@ export default function MyBookings() {
                                 <XCircle size={20} />
                               </button>
                             )}
-
                             <button 
                               onClick={() => handleDelete(booking.id)}
                               className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -294,11 +268,9 @@ export default function MyBookings() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200 border-t-8 border-indigo-600">
             <div className="flex flex-col items-center text-center">
-              
               <h3 className="text-xl font-bold text-gray-900 mb-1">Entry Pass</h3>
               <p className="text-md font-bold text-indigo-600">{qrModal.resourceName || "Resource"}</p>
               <p className="text-xs text-gray-400 mb-6 font-mono">ID: #{qrModal.resourceId}</p>
-              
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4 inline-block">
                 <QRCodeSVG 
                   value={qrModal.token || "ERROR-NO-TOKEN"} 
@@ -306,15 +278,12 @@ export default function MyBookings() {
                   level="H"
                 />
               </div>
-              
               <p className="text-[10px] text-gray-400 font-mono mb-6 uppercase tracking-wider">
                 Token: {qrModal.token ? qrModal.token.split('-')[0] : 'N/A'}
               </p>
-
               <p className="text-sm font-medium text-gray-600 mb-6 px-4">
                 Present this QR code to the security personnel for scanning.
               </p>
-
               <button 
                 onClick={() => setQrModal({ isOpen: false, token: '', resourceId: '', resourceName: '' })}
                 className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
@@ -325,7 +294,6 @@ export default function MyBookings() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

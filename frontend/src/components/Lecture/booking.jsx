@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { UserSidebar, UserTopbar } from './navbar';
 import { Calendar, Users, FileText, CheckCircle2, AlertCircle, Layers } from 'lucide-react';
-import api from '../../api/axiosInstance'; // Teammate's new API connection
+import api from '../../api/axiosInstance';
 
 export default function BookResource() {
   const location = useLocation();
@@ -17,19 +17,24 @@ export default function BookResource() {
     expectedAttendees: ''
   });
 
-  const [resources, setResources] = useState([]); 
+  const [resources, setResources] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-  // Fetch live resources using the new Axios API instance
   useEffect(() => {
+    // Fetch logged in user
+    api.get('/api/users/me')
+      .then(res => setCurrentUser(res.data))
+      .catch(err => console.error("Error fetching user:", err));
+
+    // Fetch resources
     api.get('/api/resources')
       .then(response => setResources(response.data))
       .catch(error => console.error("Error loading resources:", error));
   }, []);
 
-  // Handle Change to grab the text of the selected resource
   const handleChange = (e) => {
     const { name, value } = e.target;
     
@@ -48,7 +53,6 @@ export default function BookResource() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Date Validation
     const startYear = new Date(formData.startTime).getFullYear();
     const endYear = new Date(formData.endTime).getFullYear();
 
@@ -58,9 +62,8 @@ export default function BookResource() {
       return; 
     }
 
-    // Payload creation
     const payload = {
-      userId: 1, // Note: You'll update this once the login system is fully ready!
+      userId: currentUser?.id,  // ✅ Member 4 fix: use real logged in user ID
       resourceId: parseInt(formData.resourceId),
       resourceName: formData.resourceName, 
       startTime: formData.startTime,
@@ -70,10 +73,7 @@ export default function BookResource() {
     };
 
     try {
-      // Use teammate's Axios instance to POST data
       await api.post('/api/bookings', payload);
-      
-      // Success handling
       setShowSuccessPopup(true);
       setFormData({ 
         resourceId: preSelectedResource ? preSelectedResource.id.toString() : '', 
@@ -85,7 +85,6 @@ export default function BookResource() {
       }); 
 
     } catch (error) {
-      // Axios error handling is slightly different than native fetch
       const errorText = error.response?.data || 'Failed to connect to the server. Please check if the backend is running.';
       setErrorMessage(typeof errorText === 'string' ? errorText : "A booking error occurred."); 
       setShowErrorPopup(true);
@@ -110,7 +109,6 @@ export default function BookResource() {
               <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   
-                  {/* Dynamic Resource Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Layers size={16}/> {preSelectedResource ? 'Selected Resource' : 'Select Resource'}
@@ -213,7 +211,7 @@ export default function BookResource() {
         </div>
       </div>
 
-      {/* --- Error Popup Modal --- */}
+      {/* Error Popup Modal */}
       {showErrorPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -234,7 +232,7 @@ export default function BookResource() {
         </div>
       )}
 
-      {/* --- Success Popup Modal --- */}
+      {/* Success Popup Modal */}
       {showSuccessPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
