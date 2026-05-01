@@ -55,9 +55,24 @@ export default function AdminTickets() {
   const [newStatus, setNewStatus] = useState("");
   const [technician, setTechnician] = useState("");
   const [note, setNote] = useState("");
+  const [technicians, setTechnicians] = useState([]);
 
   useEffect(() => {
     fetchTickets();
+    const fetchTechnicians = async () => {
+      try {
+        const res = await api.get("/api/users/technicians");
+        if (!res.data) {
+          console.error("Failed to fetch technicians");
+          return;
+        }
+        console.log("TECHNICIANS:", res.data);
+        setTechnicians(res.data);
+      } catch (err) {
+        console.error("ERROR:", err);
+      }
+    };
+    fetchTechnicians();
   }, []);
 
   const fetchTickets = async () => {
@@ -98,8 +113,7 @@ export default function AdminTickets() {
   const handleAssign = async () => {
     if (!technician) { alert("Please select a technician"); return; }
     try {
-      // Member 4 fix: use axiosInstance so JWT token is attached
-      await api.put(`/api/tickets/${selectedTicket.id}/assign`, { assignedTo: technician });
+      await api.put(`/api/tickets/${selectedTicket.id}/assign`, { technicianId: technician });
       setShowModal(false);
       setTechnician("");
       fetchTickets();
@@ -259,10 +273,11 @@ export default function AdminTickets() {
             <select value={technician} onChange={(e) => setTechnician(e.target.value)}
               className="w-full border border-gray-200 bg-gray-50 rounded-xl py-3 px-4 mb-8 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all">
               <option value="">Choose a technician...</option>
-              <option value="Mike Johnson">Mike Johnson</option>
-              <option value="Tom Anderson">Tom Anderson</option>
-              <option value="John Davis">John Davis</option>
-              <option value="Tom Wilson">Tom Wilson</option>
+              {technicians.map((tech) => (
+                <option key={tech.id} value={tech.id}>
+                  {tech.name}
+                </option>
+              ))}
             </select>
             <div className="flex gap-3">
               <button onClick={() => setShowModal(false)}

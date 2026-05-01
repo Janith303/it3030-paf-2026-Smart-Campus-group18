@@ -69,6 +69,9 @@ public class TicketController {
     public ResponseEntity<Ticket> assign(
             @PathVariable Long id,
             @RequestBody AssignDTO dto) {
+        if (dto.technicianId != null) {
+            return ResponseEntity.ok(ticketService.assignTechnicianById(id, dto.technicianId));
+        }
         return ResponseEntity.ok(ticketService.assignTechnician(id, dto.assignedTo));
     }
 

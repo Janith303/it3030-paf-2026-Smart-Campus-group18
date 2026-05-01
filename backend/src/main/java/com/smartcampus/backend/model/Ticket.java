@@ -26,6 +26,10 @@ public class Ticket {
     private String status;
     private String assignedTo;
 
+    @ManyToOne
+    @JoinColumn(name = "technician_id")
+    private User technician;
+
     private LocalDateTime createdAt;
 
     @Column(length = 2000)
@@ -117,5 +121,17 @@ public class Ticket {
 
     public void setAttachments(String attachments) {
         this.attachments = attachments;
+    }
+
+    public User getTechnician() {
+        return technician;
+    }
+
+    public void setTechnician(User technician) {
+        this.technician = technician;
+    }
+
+    public String getTechnicianName() {
+        return technician != null ? technician.getName() : assignedTo;
     }
 }
