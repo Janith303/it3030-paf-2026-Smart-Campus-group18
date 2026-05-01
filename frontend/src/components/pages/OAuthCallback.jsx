@@ -5,9 +5,11 @@ export default function OAuthCallback() {
     try {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
+      const userId = params.get("userId");
 
       if (token && token.length > 0) {
         localStorage.setItem("token", token);
+        if (userId) localStorage.setItem("userId", userId);
 
         // Decode JWT to get the role
         const payload = JSON.parse(atob(token.split('.')[1]));
