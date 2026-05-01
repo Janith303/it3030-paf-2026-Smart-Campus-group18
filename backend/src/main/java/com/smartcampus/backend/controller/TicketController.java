@@ -8,6 +8,7 @@ import java.util.Map;
 import java.security.Principal;
 
 import com.smartcampus.backend.repository.UserRepository;
+import com.smartcampus.backend.model.Role;
 import com.smartcampus.backend.service.TicketService;
 import com.smartcampus.backend.service.CommentService;
 import com.smartcampus.backend.service.ActivityService;
@@ -15,6 +16,7 @@ import com.smartcampus.backend.model.Ticket;
 import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.model.Comment;
 import com.smartcampus.backend.model.Activity;
+import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 import com.smartcampus.backend.dto.AssignDTO;
 import com.smartcampus.backend.dto.StatusUpdateDTO;
@@ -29,8 +31,7 @@ public class TicketController {
     private final ActivityService activityService;
     private final UserRepository userRepository;
 
-    public TicketController(TicketService ticketService, CommentService commentService,
-                            ActivityService activityService, UserRepository userRepository) {
+    public TicketController(TicketService ticketService, CommentService commentService, ActivityService activityService, UserRepository userRepository) {
         this.ticketService = ticketService;
         this.commentService = commentService;
         this.activityService = activityService;
@@ -113,9 +114,25 @@ public class TicketController {
                 .body(commentService.addComment(id, author, message));
     }
 
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null || !user.getRole().equals(Role.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Only admin can delete comments");
+        }
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok("Comment deleted");
+    }
+
     @GetMapping("/technician/{name}")
     public ResponseEntity<List<Ticket>> getTechTickets(@PathVariable String name) {
         return ResponseEntity.ok(ticketService.getTechnicianTickets(name));
+    }
+
+    @GetMapping("/technician/id/{id}")
+    public ResponseEntity<List<Ticket>> getByTechnicianId(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.getTechnicianTicketsById(id));
     }
 
     @GetMapping("/technician/{name}/stats")

@@ -52,6 +52,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtUtils.generateToken(email, user.getRole().name());
 
         // Redirect to React frontend with token
-        response.sendRedirect("http://localhost:5173/oauth2/callback?token=" + token);
+        response.sendRedirect("http://localhost:5173/oauth2/callback?token=" + token + "&userId=" + user.getId());
     }
 }

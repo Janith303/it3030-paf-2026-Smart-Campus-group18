@@ -69,8 +69,18 @@ export default function UserTicketDetails() {
   const [activities, setActivities] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(payload.role || "");
+      } catch (e) {
+        console.error("Error decoding token", e);
+      }
+    }
     fetchTicket();
     fetchComments();
     fetchActivities();
@@ -114,7 +124,7 @@ export default function UserTicketDetails() {
       await fetch(`http://localhost:8080/api/tickets/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: newComment,
           author: "User"
         })
@@ -124,6 +134,22 @@ export default function UserTicketDetails() {
       fetchActivities();
     } catch (err) {
       console.error("Post comment error:", err);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment?")) return;
+    try {
+      const res = await fetch(`http://localhost:8080/api/tickets/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+      if (!res.ok) throw new Error();
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) {
+      alert("Delete failed");
     }
   };
 
@@ -253,7 +279,7 @@ export default function UserTicketDetails() {
                     <p className="text-sm text-gray-500">No comments yet</p>
                   ) : (
                     comments.map((comment) => (
-                      <div key={comment.id} className="p-4 bg-gray-50 rounded-xl">
+                      <div key={comment.id} className="p-4 bg-gray-50 rounded-xl relative">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm text-gray-900">{comment.author}</span>
@@ -265,6 +291,14 @@ export default function UserTicketDetails() {
                               {comment.author === 'Technician' || comment.author === 'Admin' ? 'STAFF' : 'USER'}
                             </span>
                           </div>
+                          {userRole === "ADMIN" && (
+                            <button
+                              onClick={() => handleDeleteComment(comment.id)}
+                              className="text-red-500 text-xs hover:underline font-medium"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                         <p className="text-sm text-gray-700 mb-1">{comment.message}</p>
                         <p className="text-xs text-gray-500">{formatDate(comment.createdAt)}</p>
