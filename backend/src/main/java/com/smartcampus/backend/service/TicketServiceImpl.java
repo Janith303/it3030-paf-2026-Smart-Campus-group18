@@ -174,6 +174,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public List<Ticket> getTechnicianTicketsById(Long technicianId) {
+        return repo.findByTechnician_Id(technicianId);
+    }
+
+    @Override
     public Map<String, Long> getTechnicianStats(String name) {
         List<Ticket> tickets = repo.findByAssignedTo(name);
 
@@ -201,9 +206,11 @@ public class TicketServiceImpl implements TicketService {
         Ticket t = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
         t.setStatus("RESOLVED");
-        t.setDescription(t.getDescription() + "\n\nRESOLUTION: " + notes);
+        t.setCreatedAt(t.getCreatedAt());
         Ticket saved = repo.save(t);
-        activityService.log(id, "Ticket resolved", "STATUS");
+
+        activityService.log(id, "Resolved: " + notes, "RESOLUTION");
+
         return saved;
     }
 

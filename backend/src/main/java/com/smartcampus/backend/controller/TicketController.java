@@ -103,6 +103,11 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getTechnicianTickets(name));
     }
 
+    @GetMapping("/technician/id/{id}")
+    public ResponseEntity<List<Ticket>> getByTechnicianId(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.getTechnicianTicketsById(id));
+    }
+
     @GetMapping("/technician/{name}/stats")
     public ResponseEntity<Map<String, Long>> getStats(@PathVariable String name) {
         return ResponseEntity.ok(ticketService.getTechnicianStats(name));
