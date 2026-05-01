@@ -25,6 +25,7 @@ public interface TicketService {
     Ticket assignTechnicianById(Long id, Long technicianId);
     Ticket updateStatus(Long id, String status);
     List<Ticket> getTechnicianTickets(String name);
+    List<Ticket> getTechnicianTicketsById(Long technicianId);
     Map<String, Long> getTechnicianStats(String name);
     Ticket addResolution(Long id, String notes);
     void deleteTicket(Long id);

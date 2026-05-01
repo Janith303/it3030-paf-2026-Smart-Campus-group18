@@ -3,6 +3,7 @@ package com.smartcampus.backend.service;
 import com.smartcampus.backend.model.Booking;
 import com.smartcampus.backend.model.BookingStatus;
 import com.smartcampus.backend.model.NotificationType;
+import com.smartcampus.backend.model.Role;
 import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.repository.BookingRepository;
 import com.smartcampus.backend.repository.UserRepository;
@@ -46,7 +47,22 @@ public class BookingServiceImpl implements BookingService {
         booking.setResourceName(request.getResourceName());
         booking.setStatus(BookingStatus.PENDING);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        // Member 4 — notify all admins about the new booking
+        Optional<User> bookerOpt = userRepository.findById(request.getUserId());
+        String bookerName = bookerOpt.map(User::getName).orElse("A user");
+        List<User> admins = userRepository.findByRole(Role.ADMIN);
+        for (User admin : admins) {
+            notificationService.createNotification(
+                admin,
+                bookerName + " has requested to book \"" + request.getResourceName() + "\"",
+                NotificationType.BOOKING_APPROVED,
+                saved.getId()
+            );
+        }
+
+        return saved;
     }
 
     @Override

@@ -14,6 +14,8 @@ import java.io.File;
 
 import com.smartcampus.backend.model.Ticket;
 import com.smartcampus.backend.model.User;
+import com.smartcampus.backend.model.Role;
+import com.smartcampus.backend.model.NotificationType;
 import com.smartcampus.backend.repository.TicketRepository;
 import com.smartcampus.backend.repository.UserRepository;
 import com.smartcampus.backend.dto.TicketRequestDTO;
@@ -30,6 +32,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Autowired
     private ActivityService activityService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     private String generateTicketCode() {
         Ticket last = repo.findTopByOrderByIdDesc();
@@ -109,6 +114,28 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket saved = repo.save(t);
         activityService.log(saved.getId(), "Ticket created", "CREATED");
+
+        // Member 4 — notify the user who created the ticket
+        if (saved.getCreatedBy() != null) {
+            notificationService.createNotification(
+                saved.getCreatedBy(),
+                "Your ticket " + saved.getTicketCode() + " has been submitted successfully!",
+                NotificationType.TICKET_STATUS_CHANGED,
+                saved.getId()
+            );
+        }
+
+        // Member 4 — notify all admins about the new ticket
+        List<User> admins = userRepo.findByRole(Role.ADMIN);
+        for (User admin : admins) {
+            notificationService.createNotification(
+                admin,
+                "New ticket " + saved.getTicketCode() + " submitted: " + description,
+                NotificationType.TICKET_STATUS_CHANGED,
+                saved.getId()
+            );
+        }
+
         return saved;
     }
 
@@ -157,6 +184,25 @@ public class TicketServiceImpl implements TicketService {
         t.setStatus("IN_PROGRESS");
         Ticket saved = repo.save(t);
         activityService.log(id, "Technician assigned to " + user.getName(), "ASSIGNED");
+
+        // Member 4 — notify the user who created the ticket that a technician was assigned
+        if (t.getCreatedBy() != null) {
+            notificationService.createNotification(
+                t.getCreatedBy(),
+                "A technician has been assigned to your ticket " + t.getTicketCode(),
+                NotificationType.TICKET_STATUS_CHANGED,
+                id
+            );
+        }
+
+        // Member 4 — notify the technician they have been assigned a ticket
+        notificationService.createNotification(
+            user,
+            "You have been assigned to ticket " + t.getTicketCode() + ": " + t.getDescription(),
+            NotificationType.TICKET_STATUS_CHANGED,
+            id
+        );
+
         return saved;
     }
 
@@ -167,12 +213,28 @@ public class TicketServiceImpl implements TicketService {
         t.setStatus(status);
         Ticket saved = repo.save(t);
         activityService.log(id, "Status updated to " + status, "STATUS");
+
+        // Member 4 — notify the user who created the ticket about status change
+        if (t.getCreatedBy() != null) {
+            notificationService.createNotification(
+                t.getCreatedBy(),
+                "Your ticket " + t.getTicketCode() + " status has been updated to " + status,
+                NotificationType.TICKET_STATUS_CHANGED,
+                id
+            );
+        }
+
         return saved;
     }
 
     @Override
     public List<Ticket> getTechnicianTickets(String name) {
         return repo.findByAssignedTo(name);
+    }
+
+    @Override
+    public List<Ticket> getTechnicianTicketsById(Long technicianId) {
+        return repo.findByTechnician_Id(technicianId);
     }
 
     @Override
@@ -203,9 +265,22 @@ public class TicketServiceImpl implements TicketService {
         Ticket t = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
         t.setStatus("RESOLVED");
-        t.setDescription(t.getDescription() + "\n\nRESOLUTION: " + notes);
+        t.setCreatedAt(t.getCreatedAt());
         Ticket saved = repo.save(t);
         activityService.log(id, "Ticket resolved", "STATUS");
+
+        // Member 4 — notify the user who created the ticket about resolution
+        if (t.getCreatedBy() != null) {
+            notificationService.createNotification(
+                t.getCreatedBy(),
+                "Your ticket " + t.getTicketCode() + " has been resolved!",
+                NotificationType.TICKET_STATUS_CHANGED,
+                id
+            );
+        }
+
+        activityService.log(id, "Resolved: " + notes, "RESOLUTION");
+
         return saved;
     }
 

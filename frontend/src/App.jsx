@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dash from "./components/Admin/dash";
 import AdminTickets from "./components/Admin/tickets";
 import AssignedTickets from "./components/Technician/AssignedTickets";
+import TechnicianTicketDetails from "./components/Technician/TechnicianTicketDetails";
 import AdminResources from "./components/Admin/resouces";
 import AdminTicketDetails from "./components/Admin/AdminTicketDetails";
 import BookResource from "./components/Lecture/booking";
@@ -25,6 +26,9 @@ import NotificationsPage from "./components/pages/Notifications";
 import { UserSidebar, UserTopbar } from "./components/Lecture/navbar";
 import { Sidebar, Topbar } from "./components/Admin/navbar";
 import { TechnicianSidebar, TechnicianTopbar } from "./components/Technician/navbar";
+
+import RoleRequestPage from "./components/pages/RoleRequestPage";
+import AdminRoleRequests from "./components/Admin/AdminRoleRequests";
 
 function App() {
   return (
@@ -61,7 +65,10 @@ function App() {
 
           {/* Technician Routes */}
           <Route path="/technician/tickets" element={<AssignedTickets />} />
+          <Route path="/technician/tickets/:id" element={<TechnicianTicketDetails />} />
           <Route path="/technician/notifications" element={<NotificationsPage SidebarComponent={TechnicianSidebar} TopbarComponent={TechnicianTopbar} />} />
+          <Route path="/user/role-request" element={<RoleRequestPage />} />
+          <Route path="/admin/role-requests" element={<AdminRoleRequests />} />
         </Route>
       </Routes>
     </BrowserRouter>
