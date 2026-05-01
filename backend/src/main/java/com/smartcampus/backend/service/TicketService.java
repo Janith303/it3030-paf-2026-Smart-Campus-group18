@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 import com.smartcampus.backend.model.Ticket;
+import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 
 public interface TicketService {
@@ -17,6 +18,8 @@ public interface TicketService {
             List<MultipartFile> files
     );
     List<Ticket> getAllTickets();
+    List<Ticket> getTicketsByUser(User user);
+    Ticket saveTicket(Ticket ticket);
     Ticket getTicketById(Long id);
     Ticket assignTechnician(Long id, String technician);
     Ticket assignTechnicianById(Long id, Long technicianId);

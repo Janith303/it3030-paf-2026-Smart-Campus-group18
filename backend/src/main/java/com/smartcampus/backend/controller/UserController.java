@@ -3,6 +3,9 @@ package com.smartcampus.backend.controller;
 import com.smartcampus.backend.model.Role;
 import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.repository.UserRepository;
+import com.smartcampus.backend.repository.BookingRepository;
+import com.smartcampus.backend.repository.TicketRepository;
+import com.smartcampus.backend.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +18,18 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final BookingRepository bookingRepository;
+    private final TicketRepository ticketRepository;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository,
+                          NotificationService notificationService,
+                          BookingRepository bookingRepository,
+                          TicketRepository ticketRepository) {
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.bookingRepository = bookingRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     // GET /api/users/me — get my own profile
@@ -38,9 +50,7 @@ public class UserController {
     public ResponseEntity<User> updateUserRole(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
-
         User user = userRepository.findById(id).orElseThrow();
-
         try {
             Role newRole = Role.valueOf(body.get("role").toUpperCase());
             user.setRole(newRole);
@@ -55,5 +65,28 @@ public class UserController {
     @GetMapping("/technicians")
     public ResponseEntity<List<User>> getTechnicians() {
         return ResponseEntity.ok(userRepository.findByRole(Role.TECHNICIAN));
+    }
+
+    // DELETE /api/users/{id} — Member 4: delete user and all related records
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        User user = userRepository.findById(id).orElseThrow();
+
+        // 1. Delete notifications
+        notificationService.clearAll(id);
+
+        // 2. Delete bookings
+        bookingRepository.deleteAll(bookingRepository.findByUserId(id));
+
+        // 3. Nullify ticket references (set created_by to null instead of deleting tickets)
+        ticketRepository.findByCreatedBy(user).forEach(ticket -> {
+            ticket.setCreatedBy(null);
+            ticketRepository.save(ticket);
+        });
+
+        // 4. Delete user
+        userRepository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

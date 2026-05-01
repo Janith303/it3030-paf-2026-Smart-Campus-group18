@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar, Topbar } from '../Admin/navbar';
+import { Sidebar, Topbar } from '../../components/Admin/navbar';
 import api from '../../api/axiosInstance';
-import { Users, Shield, User, Wrench, Search } from 'lucide-react';
+import { Users, Shield, User, Wrench, Search, Trash2 } from 'lucide-react';
 
 export default function RoleManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [search, setSearch] = useState('');
 
@@ -37,6 +38,23 @@ export default function RoleManagement() {
       console.error("Error updating role:", err);
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete ${userName}? This cannot be undone.`)) return;
+    setDeleting(userId);
+    try {
+      await api.delete(`/api/users/${userId}`);
+      setSuccessMsg(`User deleted successfully!`);
+      setTimeout(() => setSuccessMsg(''), 3000);
+      fetchUsers();
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      setSuccessMsg('Failed to delete user.');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -77,8 +95,12 @@ export default function RoleManagement() {
 
             {/* Success Message */}
             {successMsg && (
-              <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl font-medium">
-                ✅ {successMsg}
+              <div className={`mb-6 border px-4 py-3 rounded-xl font-medium ${
+                successMsg.includes('Failed') 
+                  ? 'bg-red-50 border-red-200 text-red-700'
+                  : 'bg-green-50 border-green-200 text-green-700'
+              }`}>
+                {successMsg.includes('Failed') ? '❌' : '✅'} {successMsg}
               </div>
             )}
 
@@ -121,13 +143,14 @@ export default function RoleManagement() {
                       <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Email</th>
                       <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Current Role</th>
                       <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Joined</th>
-                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Change Role</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center">Change Role</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center">Delete</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                           No users found matching your search.
                         </td>
                       </tr>
@@ -155,7 +178,7 @@ export default function RoleManagement() {
                           <td className="px-6 py-4 text-sm text-gray-500">
                             {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
                           </td>
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-6 py-4 text-center">
                             <select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user.id, e.target.value)}
@@ -166,6 +189,16 @@ export default function RoleManagement() {
                               <option value="ADMIN">ADMIN</option>
                               <option value="TECHNICIAN">TECHNICIAN</option>
                             </select>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => handleDeleteUser(user.id, user.name)}
+                              disabled={deleting === user.id}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete User"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </td>
                         </tr>
                       ))
