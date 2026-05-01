@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, MapPin, Tag, Calendar, Phone, 
   Clock, MessageSquare
@@ -56,24 +56,34 @@ const formatDate = (dateString) => {
 
 export default function TechnicianTicketDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [activities, setActivities] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [resolutionText, setResolutionText] = useState("");
+  const [userRole, setUserRole] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(payload.role || "");
+      } catch (e) {
+        console.error("Error decoding token", e);
+      }
+    }
+
     const fetchTicket = async () => {
       try {
         const res = await api.get(`/api/tickets/${id}`);
         console.log("TICKET DETAILS:", res.data);
         setTicket(res.data);
-        setLoading(false);
       } catch (err) {
         console.error("Fetch ticket error:", err);
+      } finally {
         setLoading(false);
       }
     };
@@ -100,8 +110,6 @@ export default function TechnicianTicketDetails() {
     fetchTicket();
     fetchComments();
     fetchActivities();
-
-    window.refreshActivities = fetchActivities;
   }, [id]);
 
   const refreshActivities = () => {
@@ -122,7 +130,6 @@ export default function TechnicianTicketDetails() {
       setShowResolutionModal(false);
       setResolutionText("");
       refreshActivities();
-      navigate("/technician/tickets");
     } catch (err) {
       console.error(err);
       alert("Error updating resolution");
@@ -142,6 +149,18 @@ export default function TechnicianTicketDetails() {
     } catch (err) {
       console.error(err);
       alert("Error adding comment");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment?")) return;
+    try {
+      const res = await api.delete(`/api/tickets/comments/${commentId}`);
+      if (!res.data) throw new Error();
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed");
     }
   };
 
@@ -264,7 +283,7 @@ export default function TechnicianTicketDetails() {
                     <p className="text-sm text-gray-400">No comments yet</p>
                   ) : (
                     comments.map((comment) => (
-                      <div key={comment.id} className="p-4 bg-gray-50 rounded-xl">
+                      <div key={comment.id} className="p-4 bg-gray-50 rounded-xl relative">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm text-gray-900">{comment.author}</span>
@@ -276,7 +295,14 @@ export default function TechnicianTicketDetails() {
                               {comment.author === 'Technician' || comment.author === 'Admin' ? 'STAFF' : 'USER'}
                             </span>
                           </div>
-                          <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
+                          {userRole === "ADMIN" && (
+                            <button
+                              onClick={() => handleDeleteComment(comment.id)}
+                              className="text-red-500 text-xs hover:underline font-medium"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                         <p className="text-sm text-gray-700">{comment.message}</p>
                       </div>
@@ -396,3 +422,4 @@ export default function TechnicianTicketDetails() {
     </div>
   );
 }
+  

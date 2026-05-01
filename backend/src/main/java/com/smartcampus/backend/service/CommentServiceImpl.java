@@ -33,4 +33,9 @@ public class CommentServiceImpl implements CommentService {
         activityService.log(ticketId, "New comment added", "COMMENT");
         return saved;
     }
+
+    @Override
+    public void deleteComment(Long commentId) {
+        commentRepo.deleteById(commentId);
+    }
 }

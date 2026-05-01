@@ -5,13 +5,17 @@ import org.springframework.http.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
+import java.security.Principal;
 
+import com.smartcampus.backend.repository.UserRepository;
+import com.smartcampus.backend.model.Role;
 import com.smartcampus.backend.service.TicketService;
 import com.smartcampus.backend.service.CommentService;
 import com.smartcampus.backend.service.ActivityService;
 import com.smartcampus.backend.model.Ticket;
 import com.smartcampus.backend.model.Comment;
 import com.smartcampus.backend.model.Activity;
+import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 import com.smartcampus.backend.dto.AssignDTO;
 import com.smartcampus.backend.dto.StatusUpdateDTO;
@@ -24,11 +28,13 @@ public class TicketController {
     private final TicketService ticketService;
     private final CommentService commentService;
     private final ActivityService activityService;
+    private final UserRepository userRepository;
 
-    public TicketController(TicketService ticketService, CommentService commentService, ActivityService activityService) {
+    public TicketController(TicketService ticketService, CommentService commentService, ActivityService activityService, UserRepository userRepository) {
         this.ticketService = ticketService;
         this.commentService = commentService;
         this.activityService = activityService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -96,6 +102,17 @@ public class TicketController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(commentService.addComment(id, author, message));
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null || !user.getRole().equals(Role.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Only admin can delete comments");
+        }
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok("Comment deleted");
     }
 
     @GetMapping("/technician/{name}")
