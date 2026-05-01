@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Tag, User, Calendar, Phone, 
   Clock, MessageSquare, Send
@@ -61,6 +61,34 @@ const getActivityIcon = (type) => {
     default: return Clock;
   }
 };
+
+function AttachmentList({ attachments }) {
+  if (!attachments || attachments.trim() === "") {
+    return <p className="text-sm text-gray-500">No attachments available</p>;
+  }
+  const files = attachments.split(",");
+  return (
+    <div className="space-y-2">
+      {files.map(function(file, i) {
+        const trimmed = file.trim();
+        const parts = trimmed.split("/");
+        const encoded = parts.map(encodeURIComponent).join("/");
+        const url = "http://localhost:8080/" + encoded;
+        const name = parts[parts.length - 1];
+        return (
+          <button
+            key={i}
+            onClick={function() { window.open(url, "_blank"); }}
+            className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 border border-gray-100 text-sm text-indigo-600 transition-colors w-full text-left"
+          >
+            <span>📎</span>
+            <span className="truncate">{name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function AdminTicketDetails() {
   const { id } = useParams();
@@ -132,14 +160,11 @@ export default function AdminTicketDetails() {
   const handleDelete = async () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this ticket?");
     if (!confirmDelete) return;
-
     try {
       const res = await fetch(`http://localhost:8080/api/tickets/${id}`, {
         method: "DELETE"
       });
-
       if (!res.ok) throw new Error("Delete failed");
-
       alert("Ticket deleted successfully");
       navigate("/admin/tickets");
     } catch (err) {
@@ -222,7 +247,6 @@ export default function AdminTicketDetails() {
                   {getPriorityBadge(ticket.priority)}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{ticket.description}</h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-start gap-2">
                     <MapPin size={16} className="text-gray-400 mt-0.5" />
@@ -262,27 +286,13 @@ export default function AdminTicketDetails() {
                 </div>
               </div>
 
+              {/* Attachments */}
               <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-900 mb-4">Attachments</h4>
-                {!ticket.attachments ? (
-                  <p className="text-sm text-gray-500">No attachments available</p>
-                ) : (
-                  <div className="space-y-2">
-                    {ticket.attachments.split(",").map((file, i) => (
-                      <a 
-                        key={i}
-                        href={`http://localhost:8080/${file}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 text-sm text-indigo-600"
-                      >
-                        <span className="truncate">View File {i + 1}</span>
-                      </a>
-                    ))}
-                  </div>
-                )}
+                <AttachmentList attachments={ticket.attachments} />
               </div>
 
+              {/* Comments */}
               <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-900 mb-4">Comments</h4>
                 <div className="space-y-4 mb-4">
@@ -378,11 +388,11 @@ export default function AdminTicketDetails() {
                 <p className="text-sm text-gray-500 mb-4">Permanently delete this ticket. This action cannot be undone.</p>
                 <div className="mt-6">
                   <button
-                  onClick={handleDelete}
-                  className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition-colors w-full"
-                >
-                  Delete Ticket
-                </button>
+                    onClick={handleDelete}
+                    className="bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition-colors w-full"
+                  >
+                    Delete Ticket
+                  </button>
                 </div>
               </div>
             </div>

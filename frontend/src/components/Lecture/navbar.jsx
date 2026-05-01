@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, Calendar, PlusCircle, 
-  AlertCircle, Search, Bell, User, Layers, LogOut
+  AlertCircle, Search, Bell, User, Layers, LogOut, Shield
 } from 'lucide-react';
 import NotificationBell from '../Notification/NotificationBell';
 
@@ -15,7 +15,7 @@ export const UserSidebar = () => {
     { name: 'My Bookings', icon: Calendar, path: '/user/bookings' },
     { name: 'Resources', icon: Layers, path: '/user/resources' },
     { name: 'My Incidents', icon: AlertCircle, path: '/user/incidents' },
-    { name: 'Profile', icon: User, path: '/user/profile' },
+    { name: 'Role Request', icon: Shield, path: '/user/role-request' },
   ];
 
   const handleLogout = () => {

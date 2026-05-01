@@ -41,6 +41,8 @@ export default function NotificationsPage({ SidebarComponent, TopbarComponent })
     }
   };
 
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   const getTypeIcon = (type) => {
     switch (type) {
       case 'BOOKING_APPROVED':
@@ -103,7 +105,14 @@ export default function NotificationsPage({ SidebarComponent, TopbarComponent })
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">All Notifications</h3>
-                    <p className="text-sm text-gray-500">{notifications.length} total</p>
+                    <p className="text-sm text-gray-500">
+                      {notifications.length} total
+                      {unreadCount > 0 && (
+                        <span className="ml-2 px-2 py-0.5 bg-indigo-600 text-white text-xs font-bold rounded-full">
+                          {unreadCount} unread
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
 
@@ -152,17 +161,27 @@ export default function NotificationsPage({ SidebarComponent, TopbarComponent })
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {notifications.map((n) => (
-                      <tr key={n.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr
+                        key={n.id}
+                        className={`transition-colors ${!n.read ? 'bg-indigo-50/60 hover:bg-indigo-50' : 'hover:bg-gray-50/50'}`}
+                      >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="bg-gray-50 p-2 rounded-lg border border-gray-100">
+                            <div className={`p-2 rounded-lg border ${!n.read ? 'bg-white border-indigo-100' : 'bg-gray-50 border-gray-100'}`}>
                               {getTypeIcon(n.type)}
                             </div>
                             {getTypeBadge(n.type)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-700 max-w-md">
-                          {n.message}
+                        <td className="px-6 py-4 text-sm max-w-md">
+                          <div className="flex items-center gap-2">
+                            {!n.read && (
+                              <span className="w-2 h-2 rounded-full bg-indigo-600 flex-shrink-0"></span>
+                            )}
+                            <span className={!n.read ? 'text-gray-900 font-medium' : 'text-gray-600'}>
+                              {n.message}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 text-right whitespace-nowrap">
                           {new Date(n.createdAt).toLocaleString()}

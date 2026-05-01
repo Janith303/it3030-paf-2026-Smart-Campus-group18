@@ -27,6 +27,9 @@ import { UserSidebar, UserTopbar } from "./components/Lecture/navbar";
 import { Sidebar, Topbar } from "./components/Admin/navbar";
 import { TechnicianSidebar, TechnicianTopbar } from "./components/Technician/navbar";
 
+import RoleRequestPage from "./components/pages/RoleRequestPage";
+import AdminRoleRequests from "./components/Admin/AdminRoleRequests";
+
 function App() {
   return (
     <BrowserRouter>
@@ -64,6 +67,8 @@ function App() {
           <Route path="/technician/tickets" element={<AssignedTickets />} />
           <Route path="/technician/tickets/:id" element={<TechnicianTicketDetails />} />
           <Route path="/technician/notifications" element={<NotificationsPage SidebarComponent={TechnicianSidebar} TopbarComponent={TechnicianTopbar} />} />
+          <Route path="/user/role-request" element={<RoleRequestPage />} />
+          <Route path="/admin/role-requests" element={<AdminRoleRequests />} />
         </Route>
       </Routes>
     </BrowserRouter>

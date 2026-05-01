@@ -12,16 +12,16 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen font-sans text-gray-900 bg-white">
       
-   {/* --- NAVIGATION --- */}
+      {/* --- NAVIGATION --- */}
       <nav className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <div className="bg-indigo-600 p-2 rounded-lg">
             <Building2 className="text-white" size={24} />
           </div>
           <span className="text-xl font-bold">Smart Campus</span>
         </div>
         <div className="flex items-center gap-6">
-          <button 
+          <button
             onClick={() => navigate('/login')}
             className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
             Sign in
@@ -46,15 +46,20 @@ export default function LandingPage() {
             <p className="text-indigo-100 text-lg mb-8 max-w-lg leading-relaxed">
               A comprehensive platform for managing university facilities, resource bookings, maintenance tickets, and campus operations all in one centralized hub.
             </p>
-            <div className="flex gap-4">
-              <button className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-indigo-50 transition-colors flex items-center gap-2">
-                Start Free Trial <ArrowRight size={18} />
-              </button>
-              <button className="bg-indigo-500/30 text-white border border-indigo-400/30 px-6 py-3 rounded-xl font-bold hover:bg-indigo-500/50 transition-colors">
-                Book a Demo
-              </button>
+
+            {/* Replaced buttons with feature highlights */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+              <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-5 py-3">
+                <CheckCircle2 size={20} className="text-green-400 flex-shrink-0" />
+                <span className="text-sm font-medium">No setup required</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/10 border border-white/20 rounded-xl px-5 py-3">
+                <Shield size={20} className="text-green-400 flex-shrink-0" />
+                <span className="text-sm font-medium">Secure Google Login</span>
+              </div>
             </div>
-            <div className="mt-10 flex items-center gap-4 text-sm text-indigo-200">
+
+            <div className="flex items-center gap-4 text-sm text-indigo-200">
               <div className="flex -space-x-2">
                 {[1,2,3,4].map(i => (
                   <div key={i} className="w-8 h-8 rounded-full bg-indigo-300 border-2 border-indigo-600"></div>
@@ -99,14 +104,14 @@ export default function LandingPage() {
           <div className="bg-indigo-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
             <Building2 className="text-indigo-600" size={24} />
           </div>
-          <h4 className="text-3xl font-bold text-gray-900 mb-1">500+</h4>
+          <h4 className="text-3xl font-bold text-gray-900 mb-1">100+</h4>
           <p className="text-sm text-gray-500 font-medium">Campus Resources</p>
         </div>
         <div>
           <div className="bg-indigo-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
             <Calendar className="text-indigo-600" size={24} />
           </div>
-          <h4 className="text-3xl font-bold text-gray-900 mb-1">10,000+</h4>
+          <h4 className="text-3xl font-bold text-gray-900 mb-1">2,000+</h4>
           <p className="text-sm text-gray-500 font-medium">Monthly Bookings</p>
         </div>
         <div>
@@ -134,7 +139,6 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-indigo-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Calendar className="text-indigo-600" size={24} />
@@ -142,7 +146,6 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">Resource Booking</h3>
               <p className="text-gray-500 leading-relaxed">Streamline facility reservations with intelligent scheduling and automated approval workflows.</p>
             </div>
-            {/* Feature 2 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-green-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <AlertCircle className="text-green-600" size={24} />
@@ -150,7 +153,6 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">Incident Management</h3>
               <p className="text-gray-500 leading-relaxed">Track and resolve maintenance issues efficiently with real-time updates and photo documentation.</p>
             </div>
-            {/* Feature 3 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-orange-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <BarChart3 className="text-orange-600" size={24} />
@@ -158,7 +160,6 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">Analytics Dashboard</h3>
               <p className="text-gray-500 leading-relaxed">Gain insights into resource utilization, booking trends, and operational performance.</p>
             </div>
-            {/* Feature 4 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-purple-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Users className="text-purple-600" size={24} />
@@ -166,7 +167,6 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">User Management</h3>
               <p className="text-gray-500 leading-relaxed">Role-based access control for students, faculty, and administrators with customizable permissions.</p>
             </div>
-            {/* Feature 5 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Shield className="text-emerald-600" size={24} />
@@ -174,7 +174,6 @@ export default function LandingPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-3">Secure & Compliant</h3>
               <p className="text-gray-500 leading-relaxed">Enterprise-grade security ensuring data protection and privacy compliance.</p>
             </div>
-            {/* Feature 6 */}
             <div className="bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-lg transition-shadow">
               <div className="bg-yellow-50 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                 <Clock className="text-yellow-600" size={24} />
@@ -236,15 +235,12 @@ export default function LandingPage() {
         <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">
           Join thousands of administrators, faculty, and students using Smart Campus Hub to streamline operations and enhance the campus experience.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="bg-white text-indigo-600 px-8 py-3.5 rounded-xl font-bold hover:bg-indigo-50 transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
-            Get Started Free <ArrowRight size={18} />
-          </button>
-          <button className="bg-indigo-500 text-white border border-indigo-400 px-8 py-3.5 rounded-xl font-bold hover:bg-indigo-400 transition-colors w-full sm:w-auto">
-            Book a Demo
-          </button>
-        </div>
-        <p className="text-indigo-200 text-sm mt-6">No credit card required • 14-day free trial</p>
+        <button
+          onClick={() => navigate('/login')}
+          className="bg-white text-indigo-600 px-8 py-3.5 rounded-xl font-bold hover:bg-indigo-50 transition-colors inline-flex items-center gap-2"
+        >
+          Sign In Now <ArrowRight size={18} />
+        </button>
       </div>
 
       {/* --- FOOTER --- */}
@@ -266,9 +262,7 @@ export default function LandingPage() {
             <h4 className="text-white font-bold mb-4">Product</h4>
             <ul className="space-y-3 text-sm">
               <li><button className="hover:text-white transition-colors">Features</button></li>
-              <li><button className="hover:text-white transition-colors">Pricing</button></li>
               <li><button className="hover:text-white transition-colors">Security</button></li>
-              <li><button className="hover:text-white transition-colors">Roadmap</button></li>
             </ul>
           </div>
           
@@ -276,8 +270,6 @@ export default function LandingPage() {
             <h4 className="text-white font-bold mb-4">Company</h4>
             <ul className="space-y-3 text-sm">
               <li><button className="hover:text-white transition-colors">About</button></li>
-              <li><button className="hover:text-white transition-colors">Blog</button></li>
-              <li><button className="hover:text-white transition-colors">Careers</button></li>
               <li><button className="hover:text-white transition-colors">Contact</button></li>
             </ul>
           </div>
@@ -286,8 +278,6 @@ export default function LandingPage() {
             <h4 className="text-white font-bold mb-4">Resources</h4>
             <ul className="space-y-3 text-sm">
               <li><button className="hover:text-white transition-colors">Documentation</button></li>
-              <li><button className="hover:text-white transition-colors">Help Center</button></li>
-              <li><button className="hover:text-white transition-colors">Community</button></li>
               <li><button className="hover:text-white transition-colors">Support</button></li>
             </ul>
           </div>
@@ -298,7 +288,6 @@ export default function LandingPage() {
           <div className="flex gap-6">
             <button className="hover:text-white transition-colors">Privacy Policy</button>
             <button className="hover:text-white transition-colors">Terms of Service</button>
-            <button className="hover:text-white transition-colors">Cookie Policy</button>
           </div>
         </div>
       </footer>
