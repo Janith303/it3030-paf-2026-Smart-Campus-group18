@@ -13,21 +13,26 @@ export default function UserDashboard() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Fetch logged in user
+    // Fetch logged in user first
     api.get('/api/users/me')
       .then(res => setUser(res.data))
       .catch(err => console.error("Error fetching user:", err));
+  }, []);
 
-    // Fetch Stats
-    api.get('/api/bookings/user/1/stats')
+  // Fetch stats and bookings only after user is loaded
+  useEffect(() => {
+    if (!user) return;
+
+    // Fetch Stats using real user ID
+    api.get(`/api/bookings/user/${user.id}/stats`)
       .then(res => setStats(res.data))
       .catch(err => console.error("Error fetching stats:", err));
 
-    // Fetch Bookings (just to show the latest 3)
-    api.get('/api/bookings/user/1')
+    // Fetch Bookings using real user ID
+    api.get(`/api/bookings/user/${user.id}`)
       .then(res => setUpcoming(res.data.slice(0, 3)))
       .catch(err => console.error("Error fetching bookings:", err));
-  }, []);
+  }, [user]);
 
   const statCards = [
     { label: 'Total Requests', value: stats.TOTAL, icon: LayoutDashboard, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -51,7 +56,7 @@ export default function UserDashboard() {
               <p className="text-gray-500">Here's what's happening with your resource bookings.</p>
             </div>
 
-            {/* --- Analytics Grid --- */}
+            {/* Analytics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {statCards.map((card, index) => (
                 <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -65,7 +70,7 @@ export default function UserDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* --- Recent Activity / Upcoming --- */}
+              {/* Recent Activity */}
               <div className="lg:col-span-2">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <div className="flex justify-between items-center mb-6">
@@ -76,27 +81,31 @@ export default function UserDashboard() {
                   </div>
                   
                   <div className="space-y-4">
-                    {upcoming.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-white p-2 rounded-lg shadow-sm text-indigo-600">
-                            <Calendar size={20}/>
+                    {upcoming.length === 0 ? (
+                      <p className="text-gray-500 text-sm text-center py-4">No bookings yet.</p>
+                    ) : (
+                      upcoming.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                          <div className="flex items-center gap-4">
+                            <div className="bg-white p-2 rounded-lg shadow-sm text-indigo-600">
+                              <Calendar size={20}/>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{item.purpose}</p>
+                              <p className="text-xs text-gray-500">Resource #{item.resourceId} • {new Date(item.startTime).toLocaleDateString()}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">{item.purpose}</p>
-                            <p className="text-xs text-gray-500">Resource #{item.resourceId} • {new Date(item.startTime).toLocaleDateString()}</p>
-                          </div>
+                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${item.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {item.status}
+                          </span>
                         </div>
-                        <span className={`text-xs font-bold px-2 py-1 rounded-md ${item.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {item.status}
-                        </span>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* --- Quick Actions --- */}
+              {/* Quick Actions */}
               <div className="lg:col-span-1">
                 <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200 mb-6">
                   <h3 className="font-bold text-lg mb-2">Need a Room?</h3>
