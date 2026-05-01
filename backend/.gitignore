@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Sensitive Configuration (Added by Member 4) ###
+.env
+*.env

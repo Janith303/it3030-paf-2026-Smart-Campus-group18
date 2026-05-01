@@ -1,34 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AlertCircle, Clock, CheckCircle, Plus, Eye } from "lucide-react";
 import { UserSidebar, UserTopbar } from "../Lecture/navbar";
-
-const tickets = [
-  {
-    id: "TKT-1001",
-    status: "IN_PROGRESS",
-    priority: "HIGH",
-    title: "Air conditioning not working in Lab 204",
-    location: "Engineering Building - Lab 204",
-    date: "2026-04-06",
-  },
-  {
-    id: "TKT-0998",
-    status: "OPEN",
-    priority: "MEDIUM",
-    title: "Broken window in Classroom 301",
-    location: "Science Building - Room 301",
-    date: "2026-04-05",
-  },
-  {
-    id: "TKT-0995",
-    status: "RESOLVED",
-    priority: "URGENT",
-    title: "Projector display issue",
-    location: "Main Building - Lecture Hall A",
-    date: "2026-04-03",
-  },
-];
 
 const getStatusBadge = (status) => {
   const styles = {
@@ -43,9 +16,9 @@ const getStatusBadge = (status) => {
   };
   return (
     <span
-      className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status]}`}
+      className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-700"}`}
     >
-      {labels[status]}
+      {labels[status] || status}
     </span>
   );
 };
@@ -59,7 +32,7 @@ const getPriorityBadge = (priority) => {
   };
   return (
     <span
-      className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[priority]}`}
+      className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[priority] || "bg-gray-100 text-gray-700"}`}
     >
       {priority}
     </span>
@@ -67,8 +40,42 @@ const getPriorityBadge = (priority) => {
 };
 
 export default function MyIncidents() {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/tickets");
+      if (!res.ok) throw new Error("API ERROR");
+      const data = await res.json();
+      
+      console.log("Fetched tickets:", data);
+      
+      const ticketsArray = Array.isArray(data) ? data : [];
+      setTickets(ticketsArray);
+      setLoading(false);
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+      setTickets([]);
+      setLoading(false);
+    }
+  };
+
+  const recentTickets = [...tickets].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const totalTickets = tickets.length;
+  const openTickets = tickets.filter(t => t.status === "OPEN").length;
+  const inProgressTickets = tickets.filter(t => t.status === "IN_PROGRESS").length;
+  const resolvedTickets = tickets.filter(t => t.status === "RESOLVED").length;
+
   return (
-    <div className="flex main-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       <UserSidebar />
       <div className="flex-1 flex flex-col ml-64">
         <UserTopbar />
@@ -98,7 +105,7 @@ export default function MyIncidents() {
                   <AlertCircle size={20} />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">12</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{totalTickets}</h3>
               <p className="text-xs text-gray-500 font-medium">All time</p>
             </div>
 
@@ -111,7 +118,7 @@ export default function MyIncidents() {
                   <Clock size={20} />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">4</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{openTickets}</h3>
               <p className="text-xs text-blue-600 font-medium">
                 Awaiting action
               </p>
@@ -126,7 +133,7 @@ export default function MyIncidents() {
                   <AlertCircle size={20} />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">3</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{inProgressTickets}</h3>
               <p className="text-xs text-yellow-600 font-medium">
                 Being worked on
               </p>
@@ -141,7 +148,7 @@ export default function MyIncidents() {
                   <CheckCircle size={20} />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">5</h3>
+              <h3 className="text-3xl font-bold text-gray-900 mb-1">{resolvedTickets}</h3>
               <p className="text-xs text-green-600 font-medium">Completed</p>
             </div>
           </div>
@@ -151,37 +158,43 @@ export default function MyIncidents() {
               Recent Tickets
             </h3>
 
-            <div className="space-y-4">
-              {tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-blue-600 font-semibold text-sm">
-                        {ticket.id}
-                      </span>
-                      {getStatusBadge(ticket.status)}
-                      {getPriorityBadge(ticket.priority)}
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      {ticket.title}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {ticket.location} • {ticket.date}
-                    </p>
-                  </div>
-                  <Link
-                    to={`/user/incidents/${ticket.id}`}
-                    className="mt-4 md:mt-0 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
+            {loading ? (
+              <p className="text-gray-500">Loading...</p>
+            ) : recentTickets.length === 0 ? (
+              <p className="text-gray-500">No tickets found</p>
+            ) : (
+              <div className="space-y-4">
+                {recentTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-200 transition-colors"
                   >
-                    <Eye size={16} />
-                    View Details
-                  </Link>
-                </div>
-              ))}
-            </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-blue-600 font-semibold text-sm">
+                          {ticket.ticketCode}
+                        </span>
+                        {getStatusBadge(ticket.status)}
+                        {getPriorityBadge(ticket.priority)}
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-1">
+                        {ticket.description}
+                      </h4>
+                      <p className="text-sm text-gray-500">
+                        {ticket.location} • {ticket.category}
+                      </p>
+                    </div>
+                    <Link
+                      to={`/user/incidents/${ticket.id}`}
+                      className="mt-4 md:mt-0 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1"
+                    >
+                      <Eye size={16} />
+                      View Details
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>

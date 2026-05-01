@@ -22,8 +22,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
            "AND b.startTime < :endTime " +
            "AND b.endTime > :startTime")
     boolean existsOverlappingBooking(
-            @Param("resourceId") Long resourceId, 
-            @Param("startTime") LocalDateTime startTime, 
+            @Param("resourceId") Long resourceId,
+            @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
 

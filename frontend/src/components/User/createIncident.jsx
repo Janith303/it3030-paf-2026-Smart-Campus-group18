@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import { Upload, X } from 'lucide-react';
 import { UserSidebar, UserTopbar } from '../Lecture/navbar';
+import api from '../../api/axiosInstance';
 
 const locations = [
-  "Engineering Building - Lab 101",
-  "Engineering Building - Lab 204",
-  "Science Building - Room 301",
+  "Main Building - Lab 101",
+  "Main Building - Lab 204",
+  "Computer Lab - A403",
   "Main Building - Lecture Hall A",
   "Library - Study Area",
-  "IT Lab - Computer Lab 2"
+  "Computer Lab - A501",
+  "Canteen",
+  "Parking Area",
+  "Ground"
 ];
 
 const categories = [
@@ -25,12 +29,13 @@ const categories = [
 const priorities = ["LOW", "MEDIUM", "HIGH"];
 
 export default function UserCreateIncident() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     location: "",
     category: "",
     description: "",
     priority: "",
-    contact: ""
+    preferredContact: ""
   });
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
@@ -73,11 +78,37 @@ export default function UserCreateIncident() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) return;
-    console.log("Form submitted:", { ...formData, files });
-    alert("Ticket submitted successfully!");
+ 
+    const formDataToSend = new FormData();
+    formDataToSend.append("location", formData.location);
+    formDataToSend.append("category", formData.category);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("priority", formData.priority);
+    formDataToSend.append("preferredContact", formData.preferredContact);
+
+    if (files && files.length > 0) {
+      for (let i = 0; i < files.length; i++) {
+        formDataToSend.append("files", files[i]);
+      }
+    }
+
+    try {
+      // Member 4 fix: use axiosInstance so JWT token is attached
+      await api.post("/api/tickets", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      
+      alert("Ticket Created Successfully!");
+      navigate("/user/incidents");
+
+    } catch (err) {
+      console.error("CATCH ERROR:", err);
+      alert("Error creating ticket: " + err.message);
+    }
   };
 
   return (
@@ -194,8 +225,8 @@ export default function UserCreateIncident() {
                   </label>
                   <input
                     type="text"
-                    name="contact"
-                    value={formData.contact}
+                    name="preferredContact"
+                    value={formData.preferredContact}
                     onChange={handleChange}
                     placeholder="Email or phone number"
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all"

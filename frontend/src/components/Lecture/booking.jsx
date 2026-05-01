@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { UserSidebar, UserTopbar } from './navbar';
 import { Calendar, Users, FileText, CheckCircle2, AlertCircle, Layers } from 'lucide-react';
+import api from '../../api/axiosInstance'; // Teammate's new API connection
 
 export default function BookResource() {
   const location = useLocation();
@@ -19,28 +20,25 @@ export default function BookResource() {
   const [resources, setResources] = useState([]); 
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  
-  // NEW: State for the Success Popup
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
+  // Fetch live resources using the new Axios API instance
   useEffect(() => {
-    fetch('http://localhost:8080/api/resources')
-      .then(response => response.json())
-      .then(data => setResources(data))
+    api.get('/api/resources')
+      .then(response => setResources(response.data))
       .catch(error => console.error("Error loading resources:", error));
   }, []);
 
-  // UPGRADED: Handle Change to grab the text of the selected resource
+  // Handle Change to grab the text of the selected resource
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'resourceId') {
-      // Find the specific resource object from our fetched array
       const selectedResource = resources.find(r => r.id.toString() === value);
       setFormData({ 
         ...formData, 
         resourceId: value,
-        resourceName: selectedResource ? selectedResource.name : '' // Save the name!
+        resourceName: selectedResource ? selectedResource.name : '' 
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -50,6 +48,7 @@ export default function BookResource() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Date Validation
     const startYear = new Date(formData.startTime).getFullYear();
     const endYear = new Date(formData.endTime).getFullYear();
 
@@ -59,11 +58,11 @@ export default function BookResource() {
       return; 
     }
 
-    // UPGRADED: Payload now includes the resourceName
+    // Payload creation
     const payload = {
-      userId: 1, 
+      userId: 1, // Note: You'll update this once the login system is fully ready!
       resourceId: parseInt(formData.resourceId),
-      resourceName: formData.resourceName, // Sent to backend!
+      resourceName: formData.resourceName, 
       startTime: formData.startTime,
       endTime: formData.endTime,
       purpose: formData.purpose,
@@ -71,33 +70,34 @@ export default function BookResource() {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      // Use teammate's Axios instance to POST data
+      await api.post('/api/bookings', payload);
+      
+      // Success handling
+      setShowSuccessPopup(true);
+      setFormData({ 
+        resourceId: preSelectedResource ? preSelectedResource.id.toString() : '', 
+        resourceName: preSelectedResource ? preSelectedResource.name : '', 
+        startTime: '', 
+        endTime: '', 
+        purpose: '', 
+        expectedAttendees: '' 
+      }); 
 
-      if (response.ok) {
-        // Trigger the success popup and reset the form
-        setShowSuccessPopup(true);
-        setFormData({ resourceId: '', resourceName: '', startTime: '', endTime: '', purpose: '', expectedAttendees: '' }); 
-      } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText); 
-        setShowErrorPopup(true);
-      }
     } catch (error) {
-      setErrorMessage('Failed to connect to the server. Please check if the backend is running.');
+      // Axios error handling is slightly different than native fetch
+      const errorText = error.response?.data || 'Failed to connect to the server. Please check if the backend is running.';
+      setErrorMessage(typeof errorText === 'string' ? errorText : "A booking error occurred."); 
       setShowErrorPopup(true);
     }
   };
 
   return (
     <>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
         <UserSidebar />
         
-        <div className="flex-1 flex flex-col ml-64">
+        <div className="flex-1 flex flex-col ml-64 min-w-0">
           <UserTopbar />
           
           <main className="flex-1 p-8 overflow-y-auto">
@@ -110,10 +110,12 @@ export default function BookResource() {
               <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   
+                  {/* Dynamic Resource Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                       <Layers size={16}/> {preSelectedResource ? 'Selected Resource' : 'Select Resource'}
                     </label>
+                    
                     {preSelectedResource ? (
                       <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-gray-700 font-medium">
                         {preSelectedResource.name}
@@ -232,7 +234,7 @@ export default function BookResource() {
         </div>
       )}
 
-      {/* --- NEW: Success Popup Modal --- */}
+      {/* --- Success Popup Modal --- */}
       {showSuccessPopup && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
