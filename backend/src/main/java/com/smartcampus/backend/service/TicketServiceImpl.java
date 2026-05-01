@@ -13,7 +13,9 @@ import java.util.Map;
 import java.io.File;
 
 import com.smartcampus.backend.model.Ticket;
+import com.smartcampus.backend.model.User;
 import com.smartcampus.backend.repository.TicketRepository;
+import com.smartcampus.backend.repository.UserRepository;
 import com.smartcampus.backend.dto.TicketRequestDTO;
 
 @Service
@@ -22,6 +24,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Autowired
     private TicketRepository repo;
+
+    @Autowired
+    private UserRepository userRepo;
 
     @Autowired
     private ActivityService activityService;
@@ -136,6 +141,20 @@ public class TicketServiceImpl implements TicketService {
         t.setStatus("IN_PROGRESS");
         Ticket saved = repo.save(t);
         activityService.log(id, "Technician assigned to " + technician, "ASSIGNED");
+        return saved;
+    }
+
+    @Override
+    public Ticket assignTechnicianById(Long id, Long technicianId) {
+        Ticket t = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        User user = userRepo.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician user not found"));
+        t.setAssignedTo(user.getName());
+        t.setTechnician(user);
+        t.setStatus("IN_PROGRESS");
+        Ticket saved = repo.save(t);
+        activityService.log(id, "Technician assigned to " + user.getName(), "ASSIGNED");
         return saved;
     }
 

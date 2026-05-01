@@ -19,6 +19,7 @@ public interface TicketService {
     List<Ticket> getAllTickets();
     Ticket getTicketById(Long id);
     Ticket assignTechnician(Long id, String technician);
+    Ticket assignTechnicianById(Long id, Long technicianId);
     Ticket updateStatus(Long id, String status);
     List<Ticket> getTechnicianTickets(String name);
     Map<String, Long> getTechnicianStats(String name);

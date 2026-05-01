@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import { Upload, X } from 'lucide-react';
 import { UserSidebar, UserTopbar } from '../Lecture/navbar';
 import api from '../../api/axiosInstance';
@@ -29,6 +29,7 @@ const categories = [
 const priorities = ["LOW", "MEDIUM", "HIGH"];
 
 export default function UserCreateIncident() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     location: "",
     category: "",
@@ -102,7 +103,7 @@ export default function UserCreateIncident() {
       });
       
       alert("Ticket Created Successfully!");
-      window.location.reload();
+      navigate("/user/incidents");
 
     } catch (err) {
       console.error("CATCH ERROR:", err);

@@ -50,4 +50,10 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    // GET /api/users/technicians — get all technician users
+    @GetMapping("/technicians")
+    public ResponseEntity<List<User>> getTechnicians() {
+        return ResponseEntity.ok(userRepository.findByRole(Role.TECHNICIAN));
+    }
 }
