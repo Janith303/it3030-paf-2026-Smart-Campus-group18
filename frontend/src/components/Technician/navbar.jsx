@@ -20,7 +20,7 @@ export const TechnicianSidebar = () => {
   };
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col overflow-hidden">
+    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col overflow-hidden fixed left-0 top-0">
       <div className="p-6 flex items-center gap-3">
         <div className="bg-indigo-600 p-2 rounded-xl text-white flex-shrink-0">
           <Building2 size={24} />
