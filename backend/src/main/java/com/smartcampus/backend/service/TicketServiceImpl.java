@@ -59,7 +59,6 @@ public class TicketServiceImpl implements TicketService {
         t.setCreatedAt(LocalDateTime.now());
 
         Ticket saved = repo.save(t);
-        System.out.println("SAVED TO DB: " + saved.getTicketCode());
         activityService.log(saved.getId(), "Ticket created", "CREATED");
         return saved;
     }
@@ -73,8 +72,6 @@ public class TicketServiceImpl implements TicketService {
             String contact,
             List<MultipartFile> files
     ) {
-        System.out.println("FILES RECEIVED IN SERVICE: " + files);
-
         Ticket t = new Ticket();
         t.setTicketCode(generateTicketCode());
         t.setLocation(location);
@@ -93,17 +90,13 @@ public class TicketServiceImpl implements TicketService {
                 try {
                     if (!file.isEmpty()) {
                         String uploadPath = System.getProperty("user.dir") + "/uploads/";
-                        System.out.println("UPLOAD DIR: " + uploadPath);
-
                         File uploadDir = new File(uploadPath);
                         if (!uploadDir.exists()) {
                             uploadDir.mkdirs();
                         }
-
                         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                         File dest = new File(uploadDir, fileName);
                         file.transferTo(dest);
-
                         filePaths.add("uploads/" + fileName);
                     }
                 } catch (Exception e) {
@@ -112,12 +105,9 @@ public class TicketServiceImpl implements TicketService {
             }
         }
 
-        System.out.println("FILES SAVED: " + filePaths);
-
         t.setAttachments(filePaths.isEmpty() ? "" : String.join(",", filePaths));
 
         Ticket saved = repo.save(t);
-        System.out.println("SAVED TO DB: " + saved.getTicketCode() + " | Attachments: " + saved.getAttachments());
         activityService.log(saved.getId(), "Ticket created", "CREATED");
         return saved;
     }
@@ -125,6 +115,18 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public List<Ticket> getAllTickets() {
         return repo.findAll();
+    }
+
+    // Member 4 — returns only tickets created by this user
+    @Override
+    public List<Ticket> getTicketsByUser(User user) {
+        return repo.findByCreatedBy(user);
+    }
+
+    // Member 4 — saves a ticket
+    @Override
+    public Ticket saveTicket(Ticket ticket) {
+        return repo.save(ticket);
     }
 
     @Override
