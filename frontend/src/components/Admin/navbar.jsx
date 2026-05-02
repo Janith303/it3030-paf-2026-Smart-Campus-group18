@@ -18,7 +18,7 @@ export const Sidebar = () => {
     { name: 'Resources', icon: Layers, path: '/resources' },
     { name: 'Bookings', icon: Calendar, path: '/admin/bookings' },
     { name: 'Check-In', icon: ScanLine, path: '/admin/check-in' },
-    { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
+    // { name: 'Incidents', icon: AlertCircle, path: '/incidents' },
     { name: 'User Requests', icon: ClipboardList, path: '/admin/role-requests' },
     
   ];
