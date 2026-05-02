@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dash from "./components/Admin/dash";
 import AdminTickets from "./components/Admin/tickets";
 import AssignedTickets from "./components/Technician/AssignedTickets";
@@ -22,53 +22,54 @@ import Login from "./components/pages/Login";
 import OAuthCallback from "./components/pages/OAuthCallback";
 import RoleManagement from "./components/pages/RoleManagement";
 import NotificationsPage from "./components/pages/Notifications";
+import RoleRequestPage from "./components/pages/RoleRequestPage";
+import AdminRoleRequests from "./components/Admin/AdminRoleRequests";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import { UserSidebar, UserTopbar } from "./components/Lecture/navbar";
 import { Sidebar, Topbar } from "./components/Admin/navbar";
 import { TechnicianSidebar, TechnicianTopbar } from "./components/Technician/navbar";
-
-import RoleRequestPage from "./components/pages/RoleRequestPage";
-import AdminRoleRequests from "./components/Admin/AdminRoleRequests";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route>
-          {/* Home */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-
-          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth2/callback" element={<OAuthCallback />} />
 
           {/* User Routes */}
-          <Route path="/user" element={<UserDashboard />} />
-          <Route path="/user/book" element={<BookResource />} />
-          <Route path="/user/bookings" element={<MyBookings />} />
-          <Route path="/user/resources" element={<UserResources />} />
-          <Route path="/user/incidents" element={<MyIncidents />} />
-          <Route path="/user/incidents/create" element={<UserCreateIncident />} />
-          <Route path="/user/incidents/:id" element={<UserTicketDetails />} />
-          <Route path="/user/notifications" element={<NotificationsPage SidebarComponent={UserSidebar} TopbarComponent={UserTopbar} />} />
+          <Route path="/user" element={<ProtectedRoute roles={['USER']}><UserDashboard /></ProtectedRoute>} />
+          <Route path="/user/book" element={<ProtectedRoute roles={['USER']}><BookResource /></ProtectedRoute>} />
+          <Route path="/user/bookings" element={<ProtectedRoute roles={['USER']}><MyBookings /></ProtectedRoute>} />
+          <Route path="/user/resources" element={<ProtectedRoute roles={['USER']}><UserResources /></ProtectedRoute>} />
+          <Route path="/user/incidents" element={<ProtectedRoute roles={['USER']}><MyIncidents /></ProtectedRoute>} />
+          <Route path="/user/incidents/create" element={<ProtectedRoute roles={['USER']}><UserCreateIncident /></ProtectedRoute>} />
+          <Route path="/user/incidents/:id" element={<ProtectedRoute roles={['USER']}><UserTicketDetails /></ProtectedRoute>} />
+          <Route path="/user/notifications" element={<ProtectedRoute roles={['USER']}><NotificationsPage SidebarComponent={UserSidebar} TopbarComponent={UserTopbar} /></ProtectedRoute>} />
+          <Route path="/user/role-request" element={<ProtectedRoute roles={['USER']}><RoleRequestPage /></ProtectedRoute>} />
 
           {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<Admindashboard />} />
-          <Route path="/admin/tickets" element={<AdminTickets />} />
-          <Route path="/admin/tickets/:id" element={<AdminTicketDetails />} />
-          <Route path="/admin/bookings" element={<AdminBookings />} />
-          <Route path="/admin/check-in" element={<CheckInScreen />} />
-          <Route path="/admin/role-management" element={<RoleManagement />} />
-          <Route path="/admin/notifications" element={<NotificationsPage SidebarComponent={Sidebar} TopbarComponent={Topbar} />} />
-          <Route path="/resources" element={<AdminResources />} />
-          <Route path="/incidents" element={<AdminTickets />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute roles={['ADMIN']}><Admindashboard /></ProtectedRoute>} />
+          <Route path="/admin/tickets" element={<ProtectedRoute roles={['ADMIN']}><AdminTickets /></ProtectedRoute>} />
+          <Route path="/admin/tickets/:id" element={<ProtectedRoute roles={['ADMIN']}><AdminTicketDetails /></ProtectedRoute>} />
+          <Route path="/admin/bookings" element={<ProtectedRoute roles={['ADMIN']}><AdminBookings /></ProtectedRoute>} />
+          <Route path="/admin/check-in" element={<ProtectedRoute roles={['ADMIN']}><CheckInScreen /></ProtectedRoute>} />
+          <Route path="/admin/role-management" element={<ProtectedRoute roles={['ADMIN']}><RoleManagement /></ProtectedRoute>} />
+          <Route path="/admin/notifications" element={<ProtectedRoute roles={['ADMIN']}><NotificationsPage SidebarComponent={Sidebar} TopbarComponent={Topbar} /></ProtectedRoute>} />
+          <Route path="/admin/role-requests" element={<ProtectedRoute roles={['ADMIN']}><AdminRoleRequests /></ProtectedRoute>} />
+          <Route path="/resources" element={<ProtectedRoute roles={['ADMIN']}><AdminResources /></ProtectedRoute>} />
+          <Route path="/incidents" element={<ProtectedRoute roles={['ADMIN']}><AdminTickets /></ProtectedRoute>} />
 
           {/* Technician Routes */}
-          <Route path="/technician/tickets" element={<AssignedTickets />} />
-          <Route path="/technician/tickets/:id" element={<TechnicianTicketDetails />} />
-          <Route path="/technician/notifications" element={<NotificationsPage SidebarComponent={TechnicianSidebar} TopbarComponent={TechnicianTopbar} />} />
-          <Route path="/user/role-request" element={<RoleRequestPage />} />
-          <Route path="/admin/role-requests" element={<AdminRoleRequests />} />
+          <Route path="/technician/tickets" element={<ProtectedRoute roles={['TECHNICIAN']}><AssignedTickets /></ProtectedRoute>} />
+          <Route path="/technician/tickets/:id" element={<ProtectedRoute roles={['TECHNICIAN']}><TechnicianTicketDetails /></ProtectedRoute>} />
+          <Route path="/technician/notifications" element={<ProtectedRoute roles={['TECHNICIAN']}><NotificationsPage SidebarComponent={TechnicianSidebar} TopbarComponent={TechnicianTopbar} /></ProtectedRoute>} />
+
+          {/* Catch all unknown routes → redirect to login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
